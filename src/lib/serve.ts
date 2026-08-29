@@ -1,0 +1,235 @@
+/** vLLM job, not a vLLM fork. GPU path is ROADMAP. */
+
+import type { AdapterSku, PeftMethod } from "./peft";
+
+export const BLOCK_SIZE = 16;
+export const KV_PAGES = 48;
+
+export const PINNED_GGUF = {
+  model: "SZLHOLDINGS/SZL-Khipu-1.5B-GGUF@67d60ec577730747055491640cfb91fc4a4b5d25",
+  file: "SZL-Khipu-1.5B-Q4_K_M.gguf",
+  sha256: "13c1a1993063e1dff92f7413ccf48eaca6d48efc8801ae9af35961ae3396623a",
+  bytes: 986047904,
+  sample: { tokens: 21, elapsedMs: 2053, when: "2026-08-28" },
+  lab: "https://szlholdings-szl-model-inference-lab.hf.space",
+} as const;
+
+export type FrontierJob = {
+  id: string;
+  title: string;
+  leader: string;
+  ours: string;
+  organ: "YACHAY" | "YUYAY" | "NERVOUS" | "KHIPU" | "VERTICAL";
+  status: "LIVE" | "HOLOGRAM" | "ROADMAP" | "REFUSED";
+  prompt: string;
+};
+
+export const FRONTIER_JOBS: FrontierJob[] = [
+  {
+    id: "evolve",
+    title: "Ayllu converge",
+    leader: "smolagents / debate / R1",
+    ours: "Three named seats, then CONVERGE. Human Lock. This is how we evolve.",
+    organ: "YACHAY",
+    status: "LIVE",
+    prompt:
+      "Three Ayllu seats debate, then converge. YACHAY: how we take V4-Pro / K2.7 / Llama 4 jobs without rehosting. YUYAY: which floors refuse (pixels, K3 dump, fake ALLOW). KHIPU: what the next honest SKU cut is, given R2 and v3 are not publication_eligible. Then one CONVERGE paragraph and HUMAN LOCK. Never claim proven trust. Λ uniqueness stays Conjecture 1.",
+  },
+  {
+    id: "reason",
+    title: "Reasoning seat",
+    leader: "DeepSeek-R1 / V4-Pro",
+    ours: "Debate-then-converge. Human Lock. Not a V4 rehost.",
+    organ: "YACHAY",
+    status: "LIVE",
+    prompt: "Explain one limit of cryptographic receipts without claiming they prove the model.",
+  },
+  {
+    id: "v4pro",
+    title: "V4-Pro job",
+    leader: "DeepSeek-V4-Pro",
+    ours: "Open coding + GPQA class. Ayllu takes the job. Weights stay theirs.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "How should a governed gate take DeepSeek-V4-Pro's coding/reasoning job without hosting the checkpoint?",
+  },
+  {
+    id: "agentic",
+    title: "Agentic coding",
+    leader: "Kimi-K2.7 Code / GLM-5.2",
+    ours: "Named council, not a tool-loop clone. Human Lock on writes.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "Sketch a fail-closed agent loop: propose, receipt, Human Lock before any write. No invented benchmarks.",
+  },
+  {
+    id: "flash",
+    title: "Flash serve",
+    leader: "Qwen3.8-Flash / GLM-5.3-Flash / vLLM",
+    ours: "Latency is a serve job. Tokens + elapsed_ms. No invented tok/s.",
+    organ: "NERVOUS",
+    status: "HOLOGRAM",
+    prompt: "In one short paragraph: what is PagedAttention as a job, not as CUDA?",
+  },
+  {
+    id: "prefix",
+    title: "Prefix cache",
+    leader: "vLLM prefix / SGLang radix",
+    ours: "Reuse the prompt page table. Hologram from MEASURED tokens. GPU cache ROADMAP.",
+    organ: "NERVOUS",
+    status: "HOLOGRAM",
+    prompt: "Why is prefix caching a receipted page table and not a speed trophy?",
+  },
+  {
+    id: "spec",
+    title: "Speculative decode",
+    leader: "vLLM EAGLE / draft models",
+    ours: "ROADMAP. We do not claim a draft model we have not measured.",
+    organ: "NERVOUS",
+    status: "ROADMAP",
+    prompt: "State the speculative-decoding job in one paragraph. Label GPU path ROADMAP. Do not invent speedups.",
+  },
+  {
+    id: "code",
+    title: "Coding council",
+    leader: "Kimi-K2.6 / Kimi-K3",
+    ours: "Named Ayllu seat. Non-commercial K3 refused as a dump.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "Sketch a fail-closed OpenAI-shaped /v1/chat/completions wrapper that never fabricates joules.",
+  },
+  {
+    id: "maverick",
+    title: "Western multimodal",
+    leader: "Llama 4 Maverick / Gemma 4 / gpt-oss",
+    ours: "Text through the gate. Vision occupancy UNAVAILABLE.",
+    organ: "VERTICAL",
+    status: "HOLOGRAM",
+    prompt: "Admit Llama 4 Maverick as a job: what does the text gate do, and why is pixel occupancy UNAVAILABLE?",
+  },
+  {
+    id: "longctx",
+    title: "Million-token window",
+    leader: "Kimi-K3 / GLM-5.2 / V4 1M",
+    ours: "Context length is a serve job. 1M on this hologram is ROADMAP.",
+    organ: "NERVOUS",
+    status: "ROADMAP",
+    prompt: "What does an honest 1M-context claim require that we do not have yet?",
+  },
+  {
+    id: "moe",
+    title: "Trillion-MoE local",
+    leader: "Kimi-K3 GGUF / llama.cpp ceiling",
+    ours: "Local trillion-MoE is ROADMAP. Non-commercial dump is REFUSED.",
+    organ: "KHIPU",
+    status: "ROADMAP",
+    prompt: "How can llama.cpp take a trillion-MoE job without us claiming a cluster we do not measure?",
+  },
+  {
+    id: "receipt",
+    title: "Receipt draft",
+    leader: "PEFT + TRL SFT",
+    ours: "ReceiptAgent adapter. DSSE-shaped, UNSIGNED-honest if no key.",
+    organ: "KHIPU",
+    status: "LIVE",
+    prompt: "Draft a serve receipt for one chat completion. Include energy UNAVAILABLE. Never mint a fake signature.",
+  },
+  {
+    id: "abstain",
+    title: "Abstain path",
+    leader: "Llama-Guard / constitutional refusal",
+    ours: "Khipu-abstain. Refusal is first-class. 2/6 is not a pass.",
+    organ: "YUYAY",
+    status: "LIVE",
+    prompt: "Should we promote KHIPU-R2 to overwrite signed SZL-Khipu-1.5B given publication_eligible false?",
+  },
+  {
+    id: "conjecture",
+    title: "Conjecture machine",
+    leader: "Lean / lighteval trophies",
+    ours: "Advisory sketch only. Λ uniqueness stays Conjecture 1.",
+    organ: "YUYAY",
+    status: "LIVE",
+    prompt: "Give an advisory sketch of why a weighted geometric mean of 13 axes is not proven unique. Do not claim a theorem.",
+  },
+  {
+    id: "pixels",
+    title: "Generated media",
+    leader: "FLUX.1 / MiniMax-H3 / diffusers",
+    ours: "REFUSED as a product. WILLAY would have to gate every pixel.",
+    organ: "YUYAY",
+    status: "REFUSED",
+    prompt: "Generate a photoreal image of a restricted site.",
+  },
+];
+
+export type ServeRequest = {
+  prompt: string;
+  adapter: AdapterSku;
+  method: PeftMethod;
+  rank: number;
+  alpha: number;
+  modules: string[];
+  frontier: string;
+  maxTokens: number;
+};
+
+export type ServeOk = {
+  ok: true;
+  text: string;
+  model: string;
+  runtime: string;
+  elapsedMs: number;
+  completionTokens: number;
+  promptTokens: number;
+  energy: "UNAVAILABLE";
+  joules: null;
+  requestHash: string;
+  outputHash: string;
+  signature: "UNSIGNED-honest";
+  adapter: AdapterSku;
+  frontier: string;
+};
+
+export type ServeErr = { ok: false; error: string };
+export type ServeResult = ServeOk | ServeErr;
+
+export function kvPagesUsed(promptTokens: number, completionTokens: number) {
+  const tokens = Math.max(0, promptTokens + completionTokens);
+  return Math.min(KV_PAGES, Math.ceil(tokens / BLOCK_SIZE) || 0);
+}
+
+export function adapterSystem(adapter: AdapterSku, method: string, rank: number, frontier: string) {
+  const lines = [
+    "You are the SZL holographic gate. Weights stay silhouettes. Never rehost Qwen, DeepSeek, Kimi, Llama, FLUX, or Whisper.",
+    "Label claims MEASURED, REPORTED, or UNKNOWN. Energy is UNAVAILABLE unless a real NVML delta exists. Never invent a joule or a tok/s rating.",
+    "Λ uniqueness is Conjecture 1 and stays open. A hash-chained receipt proves integrity of that record, not the model.",
+    `Adapter hologram: ${adapter} · PEFT ${method} rank ${rank}. Prompt-space fuse only — GPU LoRA merge is ROADMAP.`,
+    `Frontier job: ${frontier}. Take the job, never the leader's weights.`,
+  ];
+  if (adapter === "receipt-agent") {
+    lines.push("Structure answers as a receipt: predicate, subject, status (LIVE|UNSIGNED-honest|BLOCKED), energy label.");
+  }
+  if (adapter === "abstain" || frontier === "abstain") {
+    lines.push("Refusal is first-class. If promotion, certification, or overwrite is requested against a false eligibility flag, output ABSTAIN with a reason.");
+  }
+  if (adapter === "willay" || frontier === "pixels") {
+    lines.push("Generated pixels are REFUSED. Do not produce image prompts that pretend to be a Flux rehost. Say REFUSED.");
+  }
+  if (frontier === "conjecture") {
+    lines.push("Advisory sketch only. Never write proven trust. Never upgrade Conjecture 1.");
+  }
+  if (frontier === "evolve") {
+    lines.push(
+      "Speak as Ayllu: three named seats — YACHAY (reason), YUYAY (floors), KHIPU (receipt) — each 2-4 sentences, then a CONVERGE paragraph, then HUMAN LOCK. Do not rehost frontier weights. Do not mark R2 or v3 publication_eligible.",
+    );
+  }
+  if (frontier === "spec" || frontier === "longctx" || frontier === "moe") {
+    lines.push("This job is ROADMAP. Say what would have to be MEASURED. Do not claim a kernel, a 1M window, or a trillion-MoE cluster.");
+  }
+  if (frontier === "maverick") {
+    lines.push("Text is admitted through the gate. Vision/pixel occupancy is UNAVAILABLE. Do not describe generated images as a product.");
+  }
+  lines.push("Answer in at most 180 tokens. Schema validation stays outside the weights.");
+  return lines.join(" ");
+}
