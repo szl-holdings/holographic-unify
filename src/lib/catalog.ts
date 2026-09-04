@@ -427,5 +427,5 @@ export const DEV_POINTS = [
   "Only immune, ayllu, szl-atelier, a11oy bind HF_TOKEN. Other repos must skip Hub write honestly — never print published when the token is empty.",
   "Immune mirror is the estate publisher. Adding a Space means adding it there, flattened, sdk docker.",
   "Evolve tab admits V4-Pro, K2.7, GLM-5.2, Qwen3-235B, Llama 4 Maverick as jobs. K3 dump stays REFUSED. Ayllu converge is one gated call.",
-  "Open repair PRs: nexus#21, khipu-lab#8, szl-command-lab#9, immune#72. Merge those, then factory-reboot Hub.",
+  "When Grok credits run out: ChatGPT Settings → Apps → GitHub + Hugging Face MCP https://huggingface.co/mcp. Perplexity Pro/Max → Connectors → GitHub. Same doctrine. No tokens in chat.",
 ];

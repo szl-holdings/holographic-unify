@@ -671,7 +671,7 @@ export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
         )}
 
         {tab === "briefing" && (
-          <section className="grid gap-6 lg:grid-cols-2">
+          <section className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
             <article className="holo-panel rounded-xl p-6">
               <div className="flex items-center gap-2 text-muted">
                 <BookOpen className="size-4" />
@@ -702,6 +702,29 @@ export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
               <p className="mt-6 font-mono text-xs text-muted">
                 Source: github.com/szl-holdings · Hub: huggingface.co/SZLHOLDINGS · Evidence: a-11-oy.com
               </p>
+            </article>
+            <article className="holo-panel rounded-xl p-6">
+              <div className="flex items-center gap-2 text-muted">
+                <Radio className="size-4" />
+                <h2 className="font-display text-xl text-fg">Other desks</h2>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-muted">
+                When this Grok desk is out of credits, ChatGPT and Perplexity keep the same GitHub. Hugging Face writes go through ChatGPT MCP or a local token — Perplexity has no official Hub connector.
+              </p>
+              <ol className="mt-4 space-y-3 text-sm leading-relaxed">
+                <li>
+                  <span className="font-mono text-xs text-accent">ChatGPT</span>
+                  <span className="text-muted"> — Settings → Apps → GitHub. Then Hugging Face app or MCP https://huggingface.co/mcp with a token you create at huggingface.co/settings/tokens.</span>
+                </li>
+                <li>
+                  <span className="font-mono text-xs text-accent">Perplexity</span>
+                  <span className="text-muted"> — Pro/Max only. perplexity.ai/account/connectors → GitHub. Authorize szl-holdings. Hub stays read-via-web.</span>
+                </li>
+                <li>
+                  <span className="font-mono text-xs text-accent">Prompt</span>
+                  <span className="text-muted"> — Paste artifacts/SZL-OTHER-DESKS.md into both. Same doctrine. No tokens in chat. Squash-merge only green PRs.</span>
+                </li>
+              </ol>
             </article>
           </section>
         )}
