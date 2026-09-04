@@ -33,7 +33,17 @@ export const FRONTIER_JOBS: FrontierJob[] = [
     organ: "YACHAY",
     status: "LIVE",
     prompt:
-      "Three Ayllu seats debate, then converge. YACHAY: how we take V4-Pro / K2.7 / Llama 4 jobs without rehosting. YUYAY: which floors refuse (pixels, K3 dump, fake ALLOW). KHIPU: what the next honest SKU cut is, given R2 and v3 are not publication_eligible. Then one CONVERGE paragraph and HUMAN LOCK. Never claim proven trust. Λ uniqueness stays Conjecture 1.",
+      "Three Ayllu seats debate, then converge. YACHAY: how we take V4-Pro / K2.7 / GLM-5.3 / Llama 4 / Gemma 4 / gpt-oss / Inkling jobs without rehosting. YUYAY: which floors refuse (pixels, K3 dump, Inkling 975B host, fake ALLOW). KHIPU: what the next honest SKU cut is, given R2 and v3 are not publication_eligible. Then one CONVERGE paragraph and HUMAN LOCK. Never claim proven trust. Λ uniqueness stays Conjecture 1.",
+  },
+  {
+    id: "september",
+    title: "Late-summer wave",
+    leader: "GLM-5.3 / Qwen3.8 / Gemma 4 / gpt-oss / Inkling",
+    ours: "Admit the jobs. Refuse the dumps. One Human Lock.",
+    organ: "YACHAY",
+    status: "LIVE",
+    prompt:
+      "Late-summer 2026 wave. Three Ayllu seats. YACHAY: admit GLM-5.3, Qwen3.8-27B, Gemma 4, gpt-oss, and Inkling as jobs — cite the leader, keep the silhouette. YUYAY: floors that still refuse (K3 dump, Inkling 975B host, Qwen 2.4T Max dump, pixels). KHIPU: R2 and ReceiptAgent v3 stay not publication_eligible. Then CONVERGE and HUMAN LOCK. No invented benchmarks. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1.",
   },
   {
     id: "reason",
@@ -61,6 +71,24 @@ export const FRONTIER_JOBS: FrontierJob[] = [
     organ: "YACHAY",
     status: "HOLOGRAM",
     prompt: "Sketch a fail-closed agent loop: propose, receipt, Human Lock before any write. No invented benchmarks.",
+  },
+  {
+    id: "glm53",
+    title: "GLM-5.3 job",
+    leader: "Z.ai GLM-5.3",
+    ours: "Long-horizon coding as a named seat. Cluster occupancy UNAVAILABLE.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "How does a governed council take GLM-5.3's long-horizon coding job without claiming their cluster or a SWE trophy?",
+  },
+  {
+    id: "qwen38",
+    title: "Qwen3.8 job",
+    leader: "Qwen3.8-27B / Flash",
+    ours: "Apache named checkpoint as a gate job. Vision UNAVAILABLE. 2.4T Max REFUSED.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "Admit Qwen3.8-27B as a job: what does the text gate do, and why is the 2.4T Max dump refused?",
   },
   {
     id: "flash",
@@ -106,6 +134,42 @@ export const FRONTIER_JOBS: FrontierJob[] = [
     organ: "VERTICAL",
     status: "HOLOGRAM",
     prompt: "Admit Llama 4 Maverick as a job: what does the text gate do, and why is pixel occupancy UNAVAILABLE?",
+  },
+  {
+    id: "gemma4",
+    title: "Gemma 4 job",
+    leader: "Google Gemma 4",
+    ours: "Apache Western option. Serve Khipu. Not a Gemma twin.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "How should a governed gate take Gemma 4's open-weight job without hosting the checkpoint?",
+  },
+  {
+    id: "gptoss",
+    title: "gpt-oss job",
+    leader: "OpenAI gpt-oss",
+    ours: "Admit the commercially-deployable open stack. Refuse the dump.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "What does taking OpenAI gpt-oss as a job look like if we never host their weights?",
+  },
+  {
+    id: "inkling",
+    title: "Inkling job",
+    leader: "Thinking Machines Inkling",
+    ours: "US Apache multimodal MoE job. 975B host REFUSED. Pixels UNAVAILABLE.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "Admit Inkling as a job: controllable reasoning effort through Ayllu. Why is hosting 975B still a dump even on Apache-2.0?",
+  },
+  {
+    id: "cyber",
+    title: "Receipted review",
+    leader: "DeepSeek-V4-Pro / GLM-5.3 cyber class",
+    ours: "Fail-closed review seat. No invented recall. Human Lock on any exploit step.",
+    organ: "YUYAY",
+    status: "HOLOGRAM",
+    prompt: "Sketch a fail-closed vulnerability-review seat: propose, receipt, Human Lock. Do not invent a recall score. Do not drop a payload.",
   },
   {
     id: "longctx",
@@ -201,7 +265,7 @@ export function kvPagesUsed(promptTokens: number, completionTokens: number) {
 
 export function adapterSystem(adapter: AdapterSku, method: string, rank: number, frontier: string) {
   const lines = [
-    "You are the SZL holographic gate. Weights stay silhouettes. Never rehost Qwen, DeepSeek, Kimi, Llama, FLUX, or Whisper.",
+    "You are the SZL holographic gate. Weights stay silhouettes. Never rehost Qwen, DeepSeek, Kimi, Llama, Gemma, gpt-oss, Inkling, FLUX, or Whisper.",
     "Label claims MEASURED, REPORTED, or UNKNOWN. Energy is UNAVAILABLE unless a real NVML delta exists. Never invent a joule or a tok/s rating.",
     "Λ uniqueness is Conjecture 1 and stays open. A hash-chained receipt proves integrity of that record, not the model.",
     `Adapter hologram: ${adapter} · PEFT ${method} rank ${rank}. Prompt-space fuse only — GPU LoRA merge is ROADMAP.`,
@@ -219,7 +283,7 @@ export function adapterSystem(adapter: AdapterSku, method: string, rank: number,
   if (frontier === "conjecture") {
     lines.push("Advisory sketch only. Never write proven trust. Never upgrade Conjecture 1.");
   }
-  if (frontier === "evolve") {
+  if (frontier === "evolve" || frontier === "september") {
     lines.push(
       "Speak as Ayllu: three named seats — YACHAY (reason), YUYAY (floors), KHIPU (receipt) — each 2-4 sentences, then a CONVERGE paragraph, then HUMAN LOCK. Do not rehost frontier weights. Do not mark R2 or v3 publication_eligible.",
     );
@@ -227,8 +291,11 @@ export function adapterSystem(adapter: AdapterSku, method: string, rank: number,
   if (frontier === "spec" || frontier === "longctx" || frontier === "moe") {
     lines.push("This job is ROADMAP. Say what would have to be MEASURED. Do not claim a kernel, a 1M window, or a trillion-MoE cluster.");
   }
-  if (frontier === "maverick") {
-    lines.push("Text is admitted through the gate. Vision/pixel occupancy is UNAVAILABLE. Do not describe generated images as a product.");
+  if (frontier === "maverick" || frontier === "qwen38" || frontier === "inkling") {
+    lines.push("Text is admitted through the gate. Vision/pixel occupancy is UNAVAILABLE. Do not describe generated images as a product. Do not host 975B or 2.4T checkpoints.");
+  }
+  if (frontier === "cyber") {
+    lines.push("Fail-closed review only. No exploit payload. No invented recall or CVE score. Human Lock before any write.");
   }
   lines.push("Answer in at most 180 tokens. Schema validation stays outside the weights.");
   return lines.join(" ");

@@ -191,7 +191,7 @@ export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
               <p className="font-mono text-xs tracking-[0.22em] text-muted uppercase">SZL Holdings · holographic unify · Doctrine v11</p>
               <h1 className="font-display mt-1 text-3xl leading-tight tracking-tight sm:text-4xl">Estate Command</h1>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-                Hugging Face SOTA instilled as organs. Wave 2026 admitted. PEFT on Forge. Gate on Serve. Λ uniqueness is Conjecture 1.
+                Hugging Face SOTA instilled as organs. Late-summer 2026 admitted. PEFT on Forge. Gate on Serve. Λ uniqueness is Conjecture 1.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">

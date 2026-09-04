@@ -49,15 +49,15 @@ Hub RUNNING only after Immune readback (`szl-holdings/immune` `secrets.HF_TOKEN`
 
 ## What this hologram is
 
-- **Evolve** — Wave 2026 jobs: DeepSeek-V4-Pro, Kimi-K2.7 Code, GLM-5.2, Qwen3-235B-A22B, Llama 4 Maverick. Ayllu debate-then-converge + Human Lock.
+- **Evolve** — Wave 2026 jobs: DeepSeek-V4-Pro, Kimi-K2.7 Code, GLM-5.2 / 5.3, Qwen3-235B-A22B, Qwen3.8-27B, Llama 4 Maverick, Gemma 4, gpt-oss, Inkling. Ayllu debate-then-converge + Human Lock.
 - **Forge** — PEFT kit (LoRA / QLoRA / DoRA / rsLoRA / IA³). Composes a cut receipt. Does **not** train.
 - **Serve** — vLLM **job** hologram. PagedAttention page table. Tokens + elapsed_ms. No invented tok/s.
 - Pinned GGUF `SZLHOLDINGS/SZL-Khipu-1.5B-GGUF@67d60ec…` SHA-256 `13c1a199…`. MEASURED CPU lab 21 tok / 2053 ms on 2026-08-28.
 
 ## What it is not
 
-- Not a rehost of Flux, K3, V4-Pro, K2.7, GLM, Qwen, or Llama 4 weights.
-- Kimi-K3 dump is **REFUSED**.
+- Not a rehost of Flux, K3, V4-Pro, K2.7, GLM, Qwen, Llama 4, Gemma 4, gpt-oss, or Inkling weights.
+- Kimi-K3 dump is **REFUSED**. Inkling 975B host is **REFUSED**. Qwen 2.4T Max dump is **REFUSED**.
 - GPU Unsloth / vLLM CUDA remain **ROADMAP**.
 - Energy joules stay **UNAVAILABLE** unless NVML MEASURED.
 - Signatures stay **UNSIGNED-honest**. No fake DSSE.
