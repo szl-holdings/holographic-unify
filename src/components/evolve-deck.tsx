@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { Orbit, Radio, Spline } from "lucide-react";
-import { CONVERGE_PROMPT, LINEAGE, ORGAN_MUTATIONS, SEPTEMBER_PROMPT, WAVE_2026 } from "@/lib/evolve";
+import { Orbit, Radio, Repeat, Spline } from "lucide-react";
+import {
+  CONVERGE_PROMPT,
+  LINEAGE,
+  ORGAN_MUTATIONS,
+  SEPTEMBER_PROMPT,
+  WAVE_2026,
+  loopCard,
+  loopPrompt,
+} from "@/lib/evolve";
 import { useForge } from "@/lib/forge-store";
 import { runServe } from "@/lib/infer";
 import type { ServeOk } from "@/lib/serve";
@@ -23,13 +31,16 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ServeOk | null>(null);
   const [shown, setShown] = useState("");
-  const [wave, setWave] = useState<"evolve" | "september">("september");
+  const [mode, setMode] = useState<"evolve" | "september" | "loop">("loop");
+  const [cursor, setCursor] = useState(0);
 
   const counts = useMemo(() => {
     const acc = { HOLOGRAM: 0, REFUSED: 0, ROADMAP: 0, LIVE: 0, CUTTING: 0 };
     for (const w of WAVE_2026) acc[w.status] += 1;
     return acc;
   }, []);
+
+  const current = loopCard(cursor);
 
   useEffect(() => {
     if (!result) return;
@@ -63,7 +74,7 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
     setBusy(true);
     setError(null);
     setShown("");
-    setWave(kind);
+    setMode(kind);
     setFrontier(kind);
     try {
       const out = await runServe({
@@ -92,15 +103,56 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
     }
   }
 
+  async function pushLoop() {
+    if (busy) return;
+    const { card, next } = loopCard(cursor);
+    setBusy(true);
+    setError(null);
+    setShown("");
+    setMode("loop");
+    setFrontier(card.admit);
+    try {
+      if (card.status === "REFUSED") {
+        setError(`Floor — ${card.name} stays ${card.status}. ${card.ours}`);
+        setResult(null);
+        setCursor(next);
+        return;
+      }
+      const out = await runServe({
+        data: {
+          prompt: loopPrompt(card),
+          adapter: sku,
+          method,
+          rank,
+          alpha,
+          modules,
+          frontier: card.admit,
+          maxTokens: 140,
+        },
+      });
+      if (!out.ok) {
+        setError(out.error);
+        setResult(null);
+        return;
+      }
+      setResult(out);
+      setCursor(next);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "UNAVAILABLE");
+      setResult(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <section className="space-y-6">
       <div className="holo-panel rounded-xl p-5">
-        <p className="font-mono text-xs tracking-[0.18em] text-muted uppercase">wave 2026 · late summer · Doctrine v11</p>
+        <p className="font-mono text-xs tracking-[0.18em] text-muted uppercase">wave 2026 · keep-pushing loop · Doctrine v11</p>
         <h2 className="font-display mt-1 text-2xl">Push the frontier. Keep the silhouette.</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          V4-Pro, V4-Flash, K2.7, GLM-5.3, MiniMax M3, Qwen3.8, Gemma 4, gpt-oss, Inkling, Mistral Large 3, Llama 4.
-          Jobs through Ayllu. Not twins. K3 dump REFUSED. Inkling 975B host REFUSED. H3 video REFUSED. Nemotron GPU ROADMAP.
-          Λ uniqueness stays Conjecture 1.
+          One job per click. Cycle the wave. Refuse the dumps. V4-Flash, M3, Hunyuan, OLMo, Trinity, Mistral, Inkling.
+          K3 / Qwen-Max dumps REFUSED. H3 video REFUSED. Nemotron GPU ROADMAP. Λ uniqueness stays Conjecture 1.
         </p>
         <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div className="rounded-lg bg-elevated p-3">
@@ -116,15 +168,38 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
             <dd className="font-display text-xl text-warn">{counts.ROADMAP}</dd>
           </div>
           <div className="rounded-lg bg-elevated p-3">
-            <dt className="font-mono text-[10px] tracking-wider text-muted uppercase">Wave cards</dt>
-            <dd className="font-display text-xl">{WAVE_2026.length}</dd>
+            <dt className="font-mono text-[10px] tracking-wider text-muted uppercase">Loop seat</dt>
+            <dd className="font-display text-xl">
+              {current.index + 1}/{WAVE_2026.length}
+            </dd>
           </div>
         </dl>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-elevated p-4">
+          <div>
+            <p className="font-mono text-[10px] tracking-wider text-muted uppercase">Next through the gate</p>
+            <p className="font-display text-lg">{current.card.name}</p>
+            <p className={`font-mono text-xs ${tone(current.card.status)}`}>
+              {current.card.status} · {current.card.lab} · {current.card.license}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void pushLoop()}
+            disabled={busy}
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-accent px-4 text-sm text-accent-fg disabled:opacity-40"
+          >
+            <Repeat className="size-4" />
+            {busy && mode === "loop" ? "Pushing…" : "Keep pushing"}
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {WAVE_2026.map((w) => (
-          <article key={w.id} className="holo-panel rounded-xl p-4">
+        {WAVE_2026.map((w, i) => (
+          <article
+            key={w.id}
+            className={`holo-panel rounded-xl p-4 ${i === current.index ? "ring-1 ring-accent" : ""}`}
+          >
             <div className="flex items-baseline justify-between gap-2">
               <h3 className="font-display text-lg">{w.name}</h3>
               <span className={`font-mono text-[10px] tracking-wider ${tone(w.status)}`}>{w.status}</span>
@@ -136,7 +211,10 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
             <p className="mt-2 text-xs leading-relaxed text-muted">{w.note}</p>
             <button
               type="button"
-              onClick={() => admit(w.admit)}
+              onClick={() => {
+                setCursor(i);
+                admit(w.admit);
+              }}
               className="mt-3 inline-flex min-h-11 items-center text-sm text-accent underline-offset-4 hover:underline"
             >
               {w.status === "REFUSED" ? "Show the floor" : "Admit through the gate"}
@@ -192,10 +270,10 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
               type="button"
               onClick={() => void converge("september")}
               disabled={busy}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-accent px-4 text-sm text-accent-fg disabled:opacity-40"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-elevated px-4 text-sm disabled:opacity-40"
             >
               <Orbit className="size-4" />
-              {busy && wave === "september" ? "Seats in session…" : "Push this wave"}
+              {busy && mode === "september" ? "Seats in session…" : "Push this wave"}
             </button>
             <button
               type="button"
@@ -203,7 +281,7 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
               disabled={busy}
               className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-elevated px-4 text-sm disabled:opacity-40"
             >
-              {busy && wave === "evolve" ? "Seats in session…" : "Evolve us"}
+              {busy && mode === "evolve" ? "Seats in session…" : "Evolve us"}
             </button>
           </div>
         </div>

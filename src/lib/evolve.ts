@@ -170,6 +170,50 @@ export const WAVE_2026: WaveCard[] = [
     note: "Vendor models sell chips. We do not claim a cluster we do not measure.",
   },
   {
+    id: "hunyuan",
+    name: "Hunyuan Hy3",
+    lab: "Tencent",
+    job: "Open reasoning / coding class",
+    license: "mixed",
+    ours: "Ayllu seat. Not a Hunyuan dump. No invented HLE score.",
+    status: "HOLOGRAM",
+    admit: "hunyuan",
+    note: "Cite the leader. Occupancy of their cluster UNAVAILABLE.",
+  },
+  {
+    id: "olmo",
+    name: "OLMo",
+    lab: "AI2",
+    job: "Fully open US stack",
+    license: "Apache-2.0",
+    ours: "Honesty-adjacent Western open. Silhouette stays Khipu.",
+    status: "HOLOGRAM",
+    admit: "olmo",
+    note: "Cleanest US open lineage. Still not a twin.",
+  },
+  {
+    id: "trinity",
+    name: "Trinity-Large",
+    lab: "Arcee",
+    job: "US original thinking class",
+    license: "custom",
+    ours: "Reasoning job already in Ayllu. Refuse the 399B dump.",
+    status: "HOLOGRAM",
+    admit: "trinity",
+    note: "US original above 100B. Job, not host.",
+  },
+  {
+    id: "qwenmax",
+    name: "Qwen3.8-Max",
+    lab: "Alibaba",
+    job: "2.4T sparse ceiling",
+    license: "custom",
+    ours: "REFUSED dump. Named 27B job already admitted. Ceiling stays theirs.",
+    status: "REFUSED",
+    admit: "moe",
+    note: "Lawyer-before-GPU license. Honesty first.",
+  },
+  {
     id: "k3",
     name: "Kimi-K3",
     lab: "Moonshot",
@@ -274,4 +318,13 @@ export const CONVERGE_PROMPT =
   "Three Ayllu seats debate, then converge. YACHAY: how we take V4-Pro / V4-Flash / K2.7 / GLM-5.3 / MiniMax M3 / Llama 4 / Gemma 4 / gpt-oss / Inkling / Mistral Large 3 jobs without rehosting. YUYAY: which floors refuse (pixels, H3 video, K3 dump, Inkling 975B host, fake ALLOW). KHIPU: what the next honest SKU cut is, given R2 and v3 are not publication_eligible. Then one CONVERGE paragraph and HUMAN LOCK. Never claim proven trust. Λ uniqueness stays Conjecture 1.";
 
 export const SEPTEMBER_PROMPT =
-  "Keep pushing the 2026 wave. Three Ayllu seats. YACHAY: admit DeepSeek-V4-Flash, MiniMax M3, Mistral Large 3, and Nemotron 3 as jobs — cite the leader, keep the silhouette. Nemotron GPU path is ROADMAP. YUYAY: floors that still refuse (K3 dump, Inkling 975B host, Qwen 2.4T Max dump, MiniMax-H3 video, pixels). KHIPU: R2 and ReceiptAgent v3 stay not publication_eligible. Then CONVERGE and HUMAN LOCK. No invented benchmarks. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1.";
+  "Keep pushing the 2026 wave. Three Ayllu seats. YACHAY: admit DeepSeek-V4-Flash, MiniMax M3, Mistral Large 3, Hunyuan Hy3, OLMo, Trinity-Large, and Nemotron 3 as jobs — cite the leader, keep the silhouette. Nemotron GPU path is ROADMAP. YUYAY: floors that still refuse (K3 dump, Inkling 975B host, Qwen 2.4T Max dump, MiniMax-H3 video, pixels). KHIPU: R2 and ReceiptAgent v3 stay not publication_eligible. Then CONVERGE and HUMAN LOCK. No invented benchmarks. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1.";
+
+export function loopCard(index: number) {
+  const i = ((index % WAVE_2026.length) + WAVE_2026.length) % WAVE_2026.length;
+  return { index: i, card: WAVE_2026[i]!, next: (i + 1) % WAVE_2026.length };
+}
+
+export function loopPrompt(card: WaveCard) {
+  return `Keep pushing. Admit ${card.name} (${card.lab}) as a job: ${card.job}. Ours: ${card.ours} Status: ${card.status}. License: ${card.license}. ${card.note} If status is REFUSED, state the floor and stop. Do not rehost weights. No invented benchmarks. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1. One short receipt: YACHAY / YUYAY / KHIPU then HUMAN LOCK.`;
+}
