@@ -9,6 +9,7 @@ import {
   type TargetModule,
 } from "./peft";
 import type { LoopStamp } from "./evolve";
+import { stampWave } from "./evolve";
 import type { ServeOk } from "./serve";
 
 type LoopMode = "evolve" | "september" | "loop" | "circuit";
@@ -57,7 +58,7 @@ export const useForge = create<ForgeState>()((set, get) => ({
   cut: null,
   frontier: "evolve",
   loopCursor: 0,
-  loopStamps: [],
+  loopStamps: stampWave(),
   loopClosed: false,
   loopMode: "loop",
   loopResult: null,

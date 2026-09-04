@@ -49,7 +49,7 @@ Hub RUNNING only after Immune readback (`szl-holdings/immune` `secrets.HF_TOKEN`
 
 ## What this hologram is
 
-- **Evolve** — Keep-pushing loop over Wave 2026 jobs (V4-Pro / V4-Flash, K2.7, GLM-5.2 / 5.3, MiniMax M3, Qwen3.8-27B, Maverick, Gemma 4, gpt-oss, Inkling, Mistral Large 3, Hunyuan Hy3, OLMo, Trinity-Large). Nemotron 3 ROADMAP. K3 / Qwen-Max dumps REFUSED.
+- **Evolve** — Keep-pushing loop over Wave 2026. Doctrine board is 16 admitted / 2 floors / 1 roadmap. **Finish this loop** stamps the board and one Ayllu lock. Keep pushing walks one seat. K3 / Qwen-Max dumps REFUSED. Nemotron GPU ROADMAP.
 - **Forge** — PEFT kit (LoRA / QLoRA / DoRA / rsLoRA / IA³). Composes a cut receipt. Does **not** train.
 - **Serve** — vLLM **job** hologram. PagedAttention page table. Tokens + elapsed_ms. No invented tok/s.
 - Pinned GGUF `SZLHOLDINGS/SZL-Khipu-1.5B-GGUF@67d60ec…` SHA-256 `13c1a199…`. MEASURED CPU lab 21 tok / 2053 ms on 2026-08-28.

@@ -280,7 +280,7 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
         <div className="holo-panel rounded-xl p-5">
           <p className="font-mono text-xs tracking-[0.18em] text-muted uppercase">
             Circuit ledger · {admitted} admitted · {floored} floored · {roadmapped} roadmap
-            {closed ? " · CLOSED" : ""}
+            {closed ? " · CLOSED" : " · doctrine board · lock pending"}
           </p>
           <ol className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {stamps.map((s) => (
