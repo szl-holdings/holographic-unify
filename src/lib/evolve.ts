@@ -27,6 +27,17 @@ export const WAVE_2026: WaveCard[] = [
     note: "Best-open all-round class in 2026 writeups. We take the job.",
   },
   {
+    id: "v4flash",
+    name: "DeepSeek-V4-Flash",
+    lab: "DeepSeek",
+    job: "Fast long-context reasoning / coding",
+    license: "MIT",
+    ours: "Flash is a serve job. Tokens + elapsed_ms. Not a V4 dump.",
+    status: "HOLOGRAM",
+    admit: "v4flash",
+    note: "Sibling to V4-Pro. Throughput stays honest. No invented tok/s.",
+  },
+  {
     id: "k27",
     name: "Kimi-K2.7 Code",
     lab: "Moonshot",
@@ -58,6 +69,17 @@ export const WAVE_2026: WaveCard[] = [
     status: "HOLOGRAM",
     admit: "glm53",
     note: "Late-summer 2026 coding class. Occupancy of their cluster UNAVAILABLE.",
+  },
+  {
+    id: "m3",
+    name: "MiniMax M3",
+    lab: "MiniMax",
+    job: "Production multimodal + coding class",
+    license: "minimax-community",
+    ours: "Text through the gate. Vision occupancy UNAVAILABLE. H3 video stays REFUSED.",
+    status: "HOLOGRAM",
+    admit: "m3",
+    note: "Take the M3 job. Do not become MiniMax-H3.",
   },
   {
     id: "qwen235",
@@ -126,6 +148,28 @@ export const WAVE_2026: WaveCard[] = [
     note: "975B / 41B active. License is clean. Hosting it is still a dump.",
   },
   {
+    id: "mistral3",
+    name: "Mistral Large 3",
+    lab: "Mistral",
+    job: "European Apache open weights",
+    license: "Apache-2.0",
+    ours: "Admit the EU provenance job. Refuse the checkpoint dump.",
+    status: "HOLOGRAM",
+    admit: "mistral3",
+    note: "European option. Clean license. Still not a twin.",
+  },
+  {
+    id: "nemotron",
+    name: "Nemotron 3 Ultra",
+    lab: "NVIDIA",
+    job: "US hardware-tied serve class",
+    license: "custom",
+    ours: "Throughput job. GPU path ROADMAP. Not a Nemotron dump.",
+    status: "ROADMAP",
+    admit: "nemotron",
+    note: "Vendor models sell chips. We do not claim a cluster we do not measure.",
+  },
+  {
     id: "k3",
     name: "Kimi-K3",
     lab: "Moonshot",
@@ -183,6 +227,7 @@ export const LINEAGE: LineageNode[] = [
       { label: "gpt-oss", honesty: "HOLOGRAM · Apache job, dump refused" },
       { label: "Gemma 4", honesty: "HOLOGRAM · Apache job, dump refused" },
       { label: "Inkling", honesty: "HOLOGRAM job · 975B host REFUSED" },
+      { label: "Mistral Large 3", honesty: "HOLOGRAM · EU Apache job, dump refused" },
     ],
     lock: "A clean license is not permission to become their twin.",
   },
@@ -226,7 +271,7 @@ export const ORGAN_MUTATIONS: {
 ];
 
 export const CONVERGE_PROMPT =
-  "Three Ayllu seats debate, then converge. YACHAY: how we take V4-Pro / K2.7 / GLM-5.3 / Llama 4 / Gemma 4 / gpt-oss / Inkling jobs without rehosting. YUYAY: which floors refuse (pixels, K3 dump, Inkling 975B host, fake ALLOW). KHIPU: what the next honest SKU cut is, given R2 and v3 are not publication_eligible. Then one CONVERGE paragraph and HUMAN LOCK. Never claim proven trust. Λ uniqueness stays Conjecture 1.";
+  "Three Ayllu seats debate, then converge. YACHAY: how we take V4-Pro / V4-Flash / K2.7 / GLM-5.3 / MiniMax M3 / Llama 4 / Gemma 4 / gpt-oss / Inkling / Mistral Large 3 jobs without rehosting. YUYAY: which floors refuse (pixels, H3 video, K3 dump, Inkling 975B host, fake ALLOW). KHIPU: what the next honest SKU cut is, given R2 and v3 are not publication_eligible. Then one CONVERGE paragraph and HUMAN LOCK. Never claim proven trust. Λ uniqueness stays Conjecture 1.";
 
 export const SEPTEMBER_PROMPT =
-  "Late-summer 2026 wave. Three Ayllu seats. YACHAY: admit GLM-5.3, Qwen3.8-27B, Gemma 4, gpt-oss, and Inkling as jobs — cite the leader, keep the silhouette. YUYAY: floors that still refuse (K3 dump, Inkling 975B host, Qwen 2.4T Max dump, pixels). KHIPU: R2 and ReceiptAgent v3 stay not publication_eligible. Then CONVERGE and HUMAN LOCK. No invented benchmarks. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1.";
+  "Keep pushing the 2026 wave. Three Ayllu seats. YACHAY: admit DeepSeek-V4-Flash, MiniMax M3, Mistral Large 3, and Nemotron 3 as jobs — cite the leader, keep the silhouette. Nemotron GPU path is ROADMAP. YUYAY: floors that still refuse (K3 dump, Inkling 975B host, Qwen 2.4T Max dump, MiniMax-H3 video, pixels). KHIPU: R2 and ReceiptAgent v3 stay not publication_eligible. Then CONVERGE and HUMAN LOCK. No invented benchmarks. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1.";

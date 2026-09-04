@@ -49,7 +49,7 @@ Hub RUNNING only after Immune readback (`szl-holdings/immune` `secrets.HF_TOKEN`
 
 ## What this hologram is
 
-- **Evolve** — Wave 2026 jobs: DeepSeek-V4-Pro, Kimi-K2.7 Code, GLM-5.2 / 5.3, Qwen3-235B-A22B, Qwen3.8-27B, Llama 4 Maverick, Gemma 4, gpt-oss, Inkling. Ayllu debate-then-converge + Human Lock.
+- **Evolve** — Wave 2026 jobs: DeepSeek-V4-Pro / V4-Flash, Kimi-K2.7 Code, GLM-5.2 / 5.3, MiniMax M3, Qwen3-235B-A22B, Qwen3.8-27B, Llama 4 Maverick, Gemma 4, gpt-oss, Inkling, Mistral Large 3. Nemotron 3 is ROADMAP. Ayllu debate-then-converge + Human Lock.
 - **Forge** — PEFT kit (LoRA / QLoRA / DoRA / rsLoRA / IA³). Composes a cut receipt. Does **not** train.
 - **Serve** — vLLM **job** hologram. PagedAttention page table. Tokens + elapsed_ms. No invented tok/s.
 - Pinned GGUF `SZLHOLDINGS/SZL-Khipu-1.5B-GGUF@67d60ec…` SHA-256 `13c1a199…`. MEASURED CPU lab 21 tok / 2053 ms on 2026-08-28.

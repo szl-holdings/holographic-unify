@@ -98,8 +98,9 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
         <p className="font-mono text-xs tracking-[0.18em] text-muted uppercase">wave 2026 · late summer · Doctrine v11</p>
         <h2 className="font-display mt-1 text-2xl">Push the frontier. Keep the silhouette.</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          V4-Pro, K2.7, GLM-5.3, Qwen3.8, Gemma 4, gpt-oss, Inkling, Llama 4. Jobs through Ayllu. Not twins.
-          K3 dump REFUSED. Inkling 975B host REFUSED. Λ uniqueness stays Conjecture 1.
+          V4-Pro, V4-Flash, K2.7, GLM-5.3, MiniMax M3, Qwen3.8, Gemma 4, gpt-oss, Inkling, Mistral Large 3, Llama 4.
+          Jobs through Ayllu. Not twins. K3 dump REFUSED. Inkling 975B host REFUSED. H3 video REFUSED. Nemotron GPU ROADMAP.
+          Λ uniqueness stays Conjecture 1.
         </p>
         <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div className="rounded-lg bg-elevated p-3">

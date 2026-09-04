@@ -523,6 +523,8 @@ export const HF_SOFTWARE: HfSoftware[] = [
   frontier("moonshotai/Kimi-K2.6", "Moonshot", "Agentic / coding frontier.", "mixed", "YACHAY", "Named council, not Kimi weights.", "ayllu", "HOLOGRAM", "Best-open coding class in 2026 writeups."),
   frontier("moonshotai/Kimi-K3", "Moonshot", "~2.8T, 2026 ceiling.", "non-commercial", "YACHAY", "REFUSED rehost. Gate only.", "a11oy", "REFUSED", "Non-commercial restriction. Honesty first."),
   frontier("MiniMaxAI/MiniMax-H3", "MiniMax", "Image-text-to-video 33B.", "mixed", "YUYAY", "Generated video REFUSED as product.", "WILLAY", "REFUSED", "Same refusal as FLUX: every pixel would need a gate."),
+  frontier("MiniMaxAI/MiniMax-M3", "MiniMax", "Production multimodal + coding class.", "minimax-community", "YACHAY", "Admit the M3 job. Vision occupancy UNAVAILABLE. H3 video REFUSED.", "ayllu", "HOLOGRAM", "Take M3. Do not become H3."),
+  frontier("mistralai/Mistral-Large-3", "Mistral", "European Apache open weights.", "Apache-2.0", "YACHAY", "Admit the EU provenance job. Refuse the dump.", "a11oy", "HOLOGRAM", "European option. Still not a twin."),
   frontier("openai/gpt-oss", "OpenAI", "Open-weight US stack.", "Apache-2.0", "YACHAY", "Clean license. Still not a rehost.", "a11oy", "HOLOGRAM", "Western commercially-deployable alternative."),
   frontier("google/gemma-4", "Google", "Gemma 4 Apache-2.0 class.", "Apache-2.0", "YACHAY", "Clean license. Silhouette remains Khipu.", "szl-serve", "HOLOGRAM", "US/EU open option."),
   frontier("meta-llama/Llama-3.1", "Meta", "Llama family, custom license.", "Llama", "YACHAY", "Do not rehost. Serve our GGUF.", "szl-serve", "LIVE", "Llama is a serve path, not a twin."),

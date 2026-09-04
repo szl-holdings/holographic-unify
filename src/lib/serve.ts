@@ -64,6 +64,15 @@ export const FRONTIER_JOBS: FrontierJob[] = [
     prompt: "How should a governed gate take DeepSeek-V4-Pro's coding/reasoning job without hosting the checkpoint?",
   },
   {
+    id: "v4flash",
+    title: "V4-Flash job",
+    leader: "DeepSeek-V4-Flash",
+    ours: "Flash sibling. Tokens + elapsed_ms. Not a speed trophy.",
+    organ: "NERVOUS",
+    status: "HOLOGRAM",
+    prompt: "What is DeepSeek-V4-Flash as a serve job if we never invent a tok/s rating and never host the checkpoint?",
+  },
+  {
     id: "agentic",
     title: "Agentic coding",
     leader: "Kimi-K2.7 Code / GLM-5.2",
@@ -170,6 +179,33 @@ export const FRONTIER_JOBS: FrontierJob[] = [
     organ: "YUYAY",
     status: "HOLOGRAM",
     prompt: "Sketch a fail-closed vulnerability-review seat: propose, receipt, Human Lock. Do not invent a recall score. Do not drop a payload.",
+  },
+  {
+    id: "m3",
+    title: "MiniMax M3 job",
+    leader: "MiniMax M3",
+    ours: "Text gate. Vision UNAVAILABLE. H3 video REFUSED.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "Admit MiniMax M3 as a job. Why does H3 generated video stay REFUSED even if M3 is admitted?",
+  },
+  {
+    id: "mistral3",
+    title: "Mistral Large 3",
+    leader: "Mistral Large 3",
+    ours: "EU Apache job. Dump refused. Silhouette stays Khipu.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "How should a governed gate take Mistral Large 3 as a European open-weight job without hosting the checkpoint?",
+  },
+  {
+    id: "nemotron",
+    title: "Nemotron 3",
+    leader: "NVIDIA Nemotron 3 Ultra",
+    ours: "Hardware-tied serve. GPU ROADMAP. No cluster we do not measure.",
+    organ: "NERVOUS",
+    status: "ROADMAP",
+    prompt: "State the Nemotron 3 serve job. Label GPU path ROADMAP. Do not invent throughput or claim a Spark cluster.",
   },
   {
     id: "longctx",
@@ -288,11 +324,11 @@ export function adapterSystem(adapter: AdapterSku, method: string, rank: number,
       "Speak as Ayllu: three named seats — YACHAY (reason), YUYAY (floors), KHIPU (receipt) — each 2-4 sentences, then a CONVERGE paragraph, then HUMAN LOCK. Do not rehost frontier weights. Do not mark R2 or v3 publication_eligible.",
     );
   }
-  if (frontier === "spec" || frontier === "longctx" || frontier === "moe") {
-    lines.push("This job is ROADMAP. Say what would have to be MEASURED. Do not claim a kernel, a 1M window, or a trillion-MoE cluster.");
+  if (frontier === "spec" || frontier === "longctx" || frontier === "moe" || frontier === "nemotron") {
+    lines.push("This job is ROADMAP. Say what would have to be MEASURED. Do not claim a kernel, a 1M window, a trillion-MoE cluster, or a vendor GPU rack.");
   }
-  if (frontier === "maverick" || frontier === "qwen38" || frontier === "inkling") {
-    lines.push("Text is admitted through the gate. Vision/pixel occupancy is UNAVAILABLE. Do not describe generated images as a product. Do not host 975B or 2.4T checkpoints.");
+  if (frontier === "maverick" || frontier === "qwen38" || frontier === "inkling" || frontier === "m3") {
+    lines.push("Text is admitted through the gate. Vision/pixel occupancy is UNAVAILABLE. Do not describe generated images or video as a product. MiniMax-H3 stays REFUSED.");
   }
   if (frontier === "cyber") {
     lines.push("Fail-closed review only. No exploit payload. No invented recall or CVE score. Human Lock before any write.");

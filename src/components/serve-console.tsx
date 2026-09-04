@@ -9,8 +9,11 @@ import {
   KV_PAGES,
   PINNED_GGUF,
   kvPagesUsed,
+  type FrontierJob,
   type ServeOk,
 } from "@/lib/serve";
+
+const ORGANS: FrontierJob["organ"][] = ["YACHAY", "YUYAY", "NERVOUS", "KHIPU", "VERTICAL"];
 
 export function ServeConsole() {
   const method = useForge((s) => s.method);
@@ -36,6 +39,13 @@ export function ServeConsole() {
     if (!result) return 0;
     return kvPagesUsed(result.promptTokens, result.completionTokens);
   }, [result]);
+
+  const grouped = useMemo(() => {
+    return ORGANS.map((organ) => ({
+      organ,
+      jobs: FRONTIER_JOBS.filter((j) => j.organ === organ),
+    })).filter((g) => g.jobs.length);
+  }, []);
 
   useEffect(() => {
     setPrompt(job.prompt);
@@ -81,7 +91,7 @@ export function ServeConsole() {
           alpha,
           modules,
           frontier: job.id,
-          maxTokens: job.id === "evolve" ? 180 : 140,
+          maxTokens: job.id === "evolve" || job.id === "september" ? 180 : 140,
         },
       });
       if (!out.ok) {
@@ -110,23 +120,30 @@ export function ServeConsole() {
         </p>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {FRONTIER_JOBS.map((j) => {
-          const on = frontier === j.id;
-          return (
-            <button
-              key={j.id}
-              type="button"
-              onClick={() => setFrontier(j.id)}
-              className={`min-h-11 shrink-0 rounded-lg px-3 py-2 text-left ${on ? "bg-accent text-accent-fg" : "holo-panel"}`}
-            >
-              <p className="text-sm">{j.title}</p>
-              <p className={`font-mono text-[10px] ${on ? "text-accent-fg/80" : j.status === "REFUSED" ? "text-danger" : "text-muted"}`}>
-                {j.status}
-              </p>
-            </button>
-          );
-        })}
+      <div className="space-y-3">
+        {grouped.map((g) => (
+          <div key={g.organ}>
+            <p className="mb-1 font-mono text-[10px] tracking-wider text-muted uppercase">{g.organ}</p>
+            <div className="flex flex-wrap gap-2">
+              {g.jobs.map((j) => {
+                const on = frontier === j.id;
+                return (
+                  <button
+                    key={j.id}
+                    type="button"
+                    onClick={() => setFrontier(j.id)}
+                    className={`min-h-11 rounded-lg px-3 py-2 text-left ${on ? "bg-accent text-accent-fg" : "holo-panel"}`}
+                  >
+                    <p className="text-sm">{j.title}</p>
+                    <p className={`font-mono text-[10px] ${on ? "text-accent-fg/80" : j.status === "REFUSED" ? "text-danger" : "text-muted"}`}>
+                      {j.status}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
       <p className="text-sm leading-relaxed text-muted">{job.ours}</p>
 
@@ -135,7 +152,7 @@ export function ServeConsole() {
           <div className="holo-panel rounded-xl p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs tracking-widest text-muted uppercase">Prompt</p>
-              <p className="font-mono text-[11px] text-muted">
+              <p className="font-mono text-xs text-muted">
                 {adapter.name} · {method} r{rank}
               </p>
             </div>
@@ -147,7 +164,7 @@ export function ServeConsole() {
               placeholder="Take the job. Never the weights."
             />
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <p className="font-mono text-[11px] text-muted">{prompt.length}/800</p>
+              <p className="font-mono text-xs text-muted">{prompt.length}/800</p>
               <button
                 type="button"
                 onClick={() => void serve()}
@@ -167,7 +184,7 @@ export function ServeConsole() {
           <div className="holo-panel rounded-xl p-5">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs tracking-widest text-muted uppercase">PagedAttention hologram</p>
-              <p className="font-mono text-[11px] text-muted">
+              <p className="font-mono text-xs text-muted">
                 {BLOCK_SIZE} tok/page · {pages}/{KV_PAGES} · prefix {prefixPages}
               </p>
             </div>
