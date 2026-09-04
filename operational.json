@@ -1,17 +1,21 @@
 {
   "schema": "szl.unify.operational/v1",
-  "as_of": "2026-09-04T22:54:00Z",
+  "as_of": "2026-09-04T22:58:00Z",
   "source": "https://github.com/szl-holdings/holographic-unify",
-  "head_at_lock": "c2e9fa2",
+  "head_at_lock": "ab0d761",
   "hub_space": "SZLHOLDINGS/holographic-unify",
   "hub_runtime": "UNAVAILABLE",
+  "hub_probe": "HTTP 401 from this seat",
   "product_origin": "https://a-11-oy.com",
   "certified_on_product_origin": false,
   "proof_origin": "https://a11oy.net",
   "proof_role": "atlas link only",
+  "unify_open_prs": 0,
+  "org_open_prs_other_repos": 9,
   "gpu_vllm": "ROADMAP",
   "energy_joules": "UNAVAILABLE",
   "lambda_uniqueness": "Conjecture 1",
   "proven_trust": false,
-  "kimi_k3": "REFUSED"
+  "kimi_k3": "REFUSED",
+  "huggingface_connector": false
 }
