@@ -3,6 +3,7 @@ import {
   Activity,
   AlertTriangle,
   BookOpen,
+  Building2,
   Check,
   Compass,
   Cpu,
@@ -45,20 +46,26 @@ import {
   type ProofStatus,
 } from "@/lib/formulas";
 import { HF_SOFTWARE, SOTA_JOBS, SOFTWARE_COUNTS, jobsForOrgan } from "@/lib/sota";
+import { occupancyTone, VERTICALS } from "@/lib/verticals";
 import { HologramLattice } from "@/components/hologram-lattice";
 import { SotaAtlas } from "@/components/sota-atlas";
 import { ForgeLab } from "@/components/forge-lab";
 import { ServeConsole } from "@/components/serve-console";
 import { EvolveDeck } from "@/components/evolve-deck";
+import { VerticalDeck } from "@/components/vertical-deck";
 
-type Tab = "pulse" | "unify" | "evolve" | "forge" | "serve" | "sota" | "broken" | "organs" | "spaces" | "models" | "formulas" | "leaders" | "briefing";
+type Tab = "pulse" | "verticals" | "unify" | "evolve" | "forge" | "serve" | "sota" | "broken" | "organs" | "spaces" | "models" | "formulas" | "leaders" | "briefing";
 
-const TABS: { id: Tab; label: string; icon: typeof Activity }[] = [
+const COMMAND_TABS: { id: Tab; label: string; icon: typeof Activity }[] = [
   { id: "pulse", label: "Pulse", icon: Radio },
-  { id: "unify", label: "Unify", icon: Waypoints },
+  { id: "verticals", label: "Verticals", icon: Building2 },
   { id: "evolve", label: "Evolve", icon: Orbit },
   { id: "forge", label: "Forge", icon: Flame },
   { id: "serve", label: "Serve", icon: Cpu },
+];
+
+const ATLAS_TABS: { id: Tab; label: string; icon: typeof Activity }[] = [
+  { id: "unify", label: "Unify", icon: Waypoints },
   { id: "sota", label: "SOTA", icon: Layers },
   { id: "broken", label: "Repair", icon: AlertTriangle },
   { id: "organs", label: "Organs", icon: Shield },
@@ -141,7 +148,7 @@ function evalFormula(id: string, axes: number[]) {
 }
 
 export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
-  const [tab, setTab] = useState<Tab>("evolve");
+  const [tab, setTab] = useState<Tab>("pulse");
   const [query, setQuery] = useState("");
   const [organ, setOrgan] = useState<OrganId | "ALL">("ALL");
   const [lattice, setLattice] = useState<OrganId | "UNIFY">("UNIFY");
@@ -191,7 +198,7 @@ export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
               <p className="font-mono text-xs tracking-[0.22em] text-muted uppercase">SZL Holdings · holographic unify · Doctrine v11</p>
               <h1 className="font-display mt-1 text-3xl leading-tight tracking-tight sm:text-4xl">Estate Command</h1>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-                Hugging Face SOTA instilled as organs. Late-summer 2026 admitted. PEFT on Forge. Gate on Serve. Λ uniqueness is Conjecture 1.
+                Six product desks. PEFT on Forge. Gate on Serve. Wave on Evolve. Lambda uniqueness stays Conjecture 1.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -201,29 +208,24 @@ export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
               <Stat label="Proven" value={`${LOCKED_8.length}/21`} />
             </div>
           </div>
-          <nav className="flex gap-1 overflow-x-auto pb-1" aria-label="Estate views">
-            {TABS.map((t) => {
-              const Icon = t.icon;
-              const on = tab === t.id;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setTab(t.id)}
-                  className={`flex min-h-11 shrink-0 items-center gap-2 rounded-[20px] px-3 py-2 text-sm transition-colors duration-150 ${
-                    on ? "bg-accent text-accent-fg" : "bg-surface text-muted hover:text-fg"
-                  }`}
-                >
-                  <Icon className="size-4" strokeWidth={1.75} />
-                  {t.label}
-                </button>
-              );
-            })}
-          </nav>
+          <div className="space-y-2">
+            <NavRow label="Command" tabs={COMMAND_TABS} tab={tab} onTab={setTab} />
+            <NavRow label="Atlas" tabs={ATLAS_TABS} tab={tab} onTab={setTab} quiet />
+          </div>
         </div>
       </header>
 
       <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        {tab === "verticals" && (
+          <VerticalDeck
+            onUnify={() => {
+              setLattice("VERTICAL");
+              setOrgan("VERTICAL");
+              setTab("unify");
+            }}
+          />
+        )}
+
         {tab === "unify" && (
           <section className="space-y-6">
             <HologramLattice
@@ -326,6 +328,29 @@ export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
                   setTab("unify");
                 }}
               />
+              <div className="holo-panel rounded-xl p-5">
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="font-display text-xl">Vertical desks</h2>
+                  <button
+                    type="button"
+                    className="text-sm text-accent underline-offset-4 hover:underline"
+                    onClick={() => setTab("verticals")}
+                  >
+                    Open desks
+                  </button>
+                </div>
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {VERTICALS.map((v) => (
+                    <li key={v.id} className="rounded-lg bg-elevated px-3 py-2">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <p className="text-sm">{v.name}</p>
+                        <span className={`font-mono text-[10px] ${occupancyTone(v.occupancy)}`}>{v.occupancy}</span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted">{v.product}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
               <div className="holo-panel rounded-xl p-5">
                 <h2 className="font-display text-xl">What is actually down</h2>
                 <p className="mt-1 text-sm text-muted">
@@ -729,6 +754,47 @@ export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
           </section>
         )}
       </main>
+    </div>
+  );
+}
+
+function NavRow({
+  label,
+  tabs,
+  tab,
+  onTab,
+  quiet,
+}: {
+  label: string;
+  tabs: { id: Tab; label: string; icon: typeof Activity }[];
+  tab: Tab;
+  onTab: (id: Tab) => void;
+  quiet?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="hidden w-16 shrink-0 font-mono text-[10px] tracking-[0.16em] text-subtle uppercase sm:block">
+        {label}
+      </span>
+      <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto pb-1" aria-label={label}>
+        {tabs.map((t) => {
+          const Icon = t.icon;
+          const on = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => onTab(t.id)}
+              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-150 ${
+                on ? "bg-accent text-accent-fg" : quiet ? "bg-transparent text-muted hover:bg-surface hover:text-fg" : "bg-surface text-muted hover:text-fg"
+              }`}
+            >
+              <Icon className="size-4" strokeWidth={1.75} />
+              {t.label}
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
