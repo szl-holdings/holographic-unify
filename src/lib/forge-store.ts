@@ -8,6 +8,10 @@ import {
   type Quant,
   type TargetModule,
 } from "./peft";
+import type { LoopStamp } from "./evolve";
+import type { ServeOk } from "./serve";
+
+type LoopMode = "evolve" | "september" | "loop" | "circuit";
 
 type ForgeState = {
   method: PeftMethod;
@@ -19,6 +23,12 @@ type ForgeState = {
   keyed: boolean;
   cut: AdapterCut | null;
   frontier: string;
+  loopCursor: number;
+  loopStamps: LoopStamp[];
+  loopClosed: boolean;
+  loopMode: LoopMode;
+  loopResult: ServeOk | null;
+  loopError: string | null;
   setMethod: (m: PeftMethod) => void;
   setSku: (s: AdapterSku) => void;
   setRank: (n: number) => void;
@@ -27,6 +37,12 @@ type ForgeState = {
   setQuant: (q: Quant) => void;
   setKeyed: (k: boolean) => void;
   setFrontier: (id: string) => void;
+  setLoopCursor: (n: number) => void;
+  setLoopStamps: (stamps: LoopStamp[] | ((prev: LoopStamp[]) => LoopStamp[])) => void;
+  setLoopClosed: (closed: boolean) => void;
+  setLoopMode: (mode: LoopMode) => void;
+  setLoopResult: (result: ServeOk | null) => void;
+  setLoopError: (error: string | null) => void;
   cutAdapter: () => AdapterCut;
 };
 
@@ -40,6 +56,12 @@ export const useForge = create<ForgeState>()((set, get) => ({
   keyed: false,
   cut: null,
   frontier: "evolve",
+  loopCursor: 0,
+  loopStamps: [],
+  loopClosed: false,
+  loopMode: "loop",
+  loopResult: null,
+  loopError: null,
   setMethod: (method) => set({ method, quant: defaultQuant(method) }),
   setSku: (sku) => set({ sku }),
   setRank: (rank) => set({ rank }),
@@ -53,6 +75,13 @@ export const useForge = create<ForgeState>()((set, get) => ({
   setQuant: (quant) => set({ quant }),
   setKeyed: (keyed) => set({ keyed }),
   setFrontier: (frontier) => set({ frontier }),
+  setLoopCursor: (loopCursor) => set({ loopCursor }),
+  setLoopStamps: (stamps) =>
+    set((s) => ({ loopStamps: typeof stamps === "function" ? stamps(s.loopStamps) : stamps })),
+  setLoopClosed: (loopClosed) => set({ loopClosed }),
+  setLoopMode: (loopMode) => set({ loopMode }),
+  setLoopResult: (loopResult) => set({ loopResult }),
+  setLoopError: (loopError) => set({ loopError }),
   cutAdapter: () => {
     const s = get();
     const cut = composeCut({

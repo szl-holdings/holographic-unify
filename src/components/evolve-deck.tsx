@@ -6,15 +6,16 @@ import {
   ORGAN_MUTATIONS,
   SEPTEMBER_PROMPT,
   WAVE_2026,
+  circuitPrompt,
   loopCard,
   loopPrompt,
+  stampWave,
 } from "@/lib/evolve";
 import { useForge } from "@/lib/forge-store";
 import { runServe } from "@/lib/infer";
-import type { ServeOk } from "@/lib/serve";
 
 function tone(status: string) {
-  if (status === "REFUSED") return "text-danger";
+  if (status === "REFUSED" || status === "FLOOR") return "text-danger";
   if (status === "ROADMAP" || status === "CUTTING") return "text-warn";
   return "text-accent";
 }
@@ -26,13 +27,21 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
   const alpha = useForge((s) => s.alpha);
   const modules = useForge((s) => s.modules);
   const setFrontier = useForge((s) => s.setFrontier);
+  const cursor = useForge((s) => s.loopCursor);
+  const stamps = useForge((s) => s.loopStamps);
+  const closed = useForge((s) => s.loopClosed);
+  const mode = useForge((s) => s.loopMode);
+  const result = useForge((s) => s.loopResult);
+  const error = useForge((s) => s.loopError);
+  const setCursor = useForge((s) => s.setLoopCursor);
+  const setStamps = useForge((s) => s.setLoopStamps);
+  const setClosed = useForge((s) => s.setLoopClosed);
+  const setMode = useForge((s) => s.setLoopMode);
+  const setResult = useForge((s) => s.setLoopResult);
+  const setError = useForge((s) => s.setLoopError);
 
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ServeOk | null>(null);
   const [shown, setShown] = useState("");
-  const [mode, setMode] = useState<"evolve" | "september" | "loop">("loop");
-  const [cursor, setCursor] = useState(0);
 
   const counts = useMemo(() => {
     const acc = { HOLOGRAM: 0, REFUSED: 0, ROADMAP: 0, LIVE: 0, CUTTING: 0 };
@@ -41,9 +50,15 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
   }, []);
 
   const current = loopCard(cursor);
+  const admitted = stamps.filter((s) => s.verdict === "ADMITTED").length;
+  const floored = stamps.filter((s) => s.verdict === "FLOOR").length;
+  const roadmapped = stamps.filter((s) => s.verdict === "ROADMAP").length;
 
   useEffect(() => {
-    if (!result) return;
+    if (!result) {
+      setShown("");
+      return;
+    }
     const full = result.text;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
@@ -58,11 +73,6 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
     }, 16);
     return () => window.clearInterval(id);
   }, [result]);
-
-  useEffect(() => {
-    if (!shown) return;
-    document.getElementById("ayllu-converge")?.scrollIntoView({ block: "nearest" });
-  }, [shown]);
 
   function admit(jobId: string) {
     setFrontier(jobId);
@@ -115,6 +125,10 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
       if (card.status === "REFUSED") {
         setError(`Floor — ${card.name} stays ${card.status}. ${card.ours}`);
         setResult(null);
+        setStamps((prev) => [
+          ...prev.filter((s) => s.id !== card.id),
+          { id: card.id, name: card.name, verdict: "FLOOR", honesty: card.status, note: card.ours },
+        ]);
         setCursor(next);
         return;
       }
@@ -136,10 +150,58 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
         return;
       }
       setResult(out);
+      setStamps((prev) => [
+        ...prev.filter((s) => s.id !== card.id),
+        {
+          id: card.id,
+          name: card.name,
+          verdict: card.status === "ROADMAP" ? "ROADMAP" : "ADMITTED",
+          honesty: card.status,
+          note: card.ours,
+        },
+      ]);
       setCursor(next);
     } catch (err) {
       setError(err instanceof Error ? err.message : "UNAVAILABLE");
       setResult(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function finishCircuit() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    setShown("");
+    setMode("circuit");
+    const board = stampWave();
+    setStamps(board);
+    setCursor(0);
+    setFrontier("september");
+    try {
+      const out = await runServe({
+        data: {
+          prompt: circuitPrompt(board),
+          adapter: sku,
+          method,
+          rank,
+          alpha,
+          modules,
+          frontier: "september",
+          maxTokens: 180,
+        },
+      });
+      if (!out.ok) {
+        setError(out.error);
+        setClosed(false);
+        return;
+      }
+      setResult(out);
+      setClosed(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "UNAVAILABLE");
+      setClosed(false);
     } finally {
       setBusy(false);
     }
@@ -171,28 +233,67 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
             <dt className="font-mono text-[10px] tracking-wider text-muted uppercase">Loop seat</dt>
             <dd className="font-display text-xl">
               {current.index + 1}/{WAVE_2026.length}
+              {closed ? <span className="ml-2 font-mono text-xs text-accent">CLOSED</span> : null}
             </dd>
           </div>
         </dl>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-elevated p-4">
           <div>
             <p className="font-mono text-[10px] tracking-wider text-muted uppercase">Next through the gate</p>
-            <p className="font-display text-lg">{current.card.name}</p>
+            <p className="font-display text-lg">{closed ? "Circuit closed" : current.card.name}</p>
             <p className={`font-mono text-xs ${tone(current.card.status)}`}>
               {current.card.status} · {current.card.lab} · {current.card.license}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void pushLoop()}
-            disabled={busy}
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-accent px-4 text-sm text-accent-fg disabled:opacity-40"
-          >
-            <Repeat className="size-4" />
-            {busy && mode === "loop" ? "Pushing…" : "Keep pushing"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void pushLoop()}
+              disabled={busy || closed}
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-accent px-4 text-sm text-accent-fg disabled:opacity-40"
+            >
+              <Repeat className="size-4" />
+              {busy && mode === "loop" ? "Pushing…" : "Keep pushing"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void finishCircuit()}
+              disabled={busy}
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-4 text-sm disabled:opacity-40"
+            >
+              <Orbit className="size-4" />
+              {busy && mode === "circuit" ? "Closing circuit…" : closed ? "Circuit closed" : "Finish this loop"}
+            </button>
+          </div>
         </div>
+        {error && <p className="mt-4 text-sm text-danger">{error}</p>}
+        {shown && <div className="token-out mt-4 rounded-lg bg-elevated p-4 text-sm leading-relaxed whitespace-pre-wrap">{shown}</div>}
+        {result && (
+          <p className="mt-3 flex items-center gap-2 font-mono text-xs text-muted">
+            <Radio className="size-3.5" />
+            {result.frontier} · {result.completionTokens} tok · {result.elapsedMs} ms · {result.signature} · joules null
+          </p>
+        )}
       </div>
+
+      {stamps.length > 0 && (
+        <div className="holo-panel rounded-xl p-5">
+          <p className="font-mono text-xs tracking-[0.18em] text-muted uppercase">
+            Circuit ledger · {admitted} admitted · {floored} floored · {roadmapped} roadmap
+            {closed ? " · CLOSED" : ""}
+          </p>
+          <ol className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {stamps.map((s) => (
+              <li key={s.id} className="rounded-lg bg-elevated p-3">
+                <p className="font-mono text-sm">{s.name}</p>
+                <p className={`font-mono text-[10px] tracking-wider ${tone(s.verdict === "FLOOR" ? "REFUSED" : s.verdict)}`}>
+                  {s.verdict}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {WAVE_2026.map((w, i) => (
@@ -285,14 +386,6 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
             </button>
           </div>
         </div>
-        {error && <p className="mt-4 text-sm text-danger">{error}</p>}
-        {shown && <div className="token-out mt-4 rounded-lg bg-elevated p-4 text-sm leading-relaxed whitespace-pre-wrap">{shown}</div>}
-        {result && (
-          <p className="mt-3 flex items-center gap-2 font-mono text-xs text-muted">
-            <Radio className="size-3.5" />
-            {result.frontier} · {result.completionTokens} tok · {result.elapsedMs} ms · {result.signature} · joules null
-          </p>
-        )}
       </div>
     </section>
   );

@@ -335,7 +335,12 @@ export function adapterSystem(adapter: AdapterSku, method: string, rank: number,
     `Frontier job: ${frontier}. Take the job, never the leader's weights.`,
   ];
   if (adapter === "receipt-agent") {
-    lines.push("Structure answers as a receipt: predicate, subject, status (LIVE|UNSIGNED-honest|BLOCKED), energy label.");
+    const waveAdmit = frontier !== "pixels" && frontier !== "abstain";
+    lines.push(
+      waveAdmit
+        ? "Structure as a receipt: predicate, subject, status ADMITTED|FLOOR|ROADMAP. Never write BLOCKED for an admitted job. REFUSED dumps use FLOOR."
+        : "Structure answers as a receipt: predicate, subject, status (LIVE|UNSIGNED-honest|BLOCKED), energy label.",
+    );
   }
   if (adapter === "abstain" || frontier === "abstain") {
     lines.push("Refusal is first-class. If promotion, certification, or overwrite is requested against a false eligibility flag, output ABSTAIN with a reason.");

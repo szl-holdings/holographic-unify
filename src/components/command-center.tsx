@@ -267,13 +267,13 @@ export function CommandCenter({ snapshot }: { snapshot: EstateSnapshot }) {
           </section>
         )}
 
-        {tab === "evolve" && (
+        <div className={tab === "evolve" ? "contents" : "hidden"}>
           <EvolveDeck
             onServe={() => {
               setTab("serve");
             }}
           />
-        )}
+        </div>
 
         {tab === "forge" && <ForgeLab onServe={() => setTab("serve")} />}
 

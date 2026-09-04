@@ -326,5 +326,32 @@ export function loopCard(index: number) {
 }
 
 export function loopPrompt(card: WaveCard) {
-  return `Keep pushing. Admit ${card.name} (${card.lab}) as a job: ${card.job}. Ours: ${card.ours} Status: ${card.status}. License: ${card.license}. ${card.note} If status is REFUSED, state the floor and stop. Do not rehost weights. No invented benchmarks. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1. One short receipt: YACHAY / YUYAY / KHIPU then HUMAN LOCK.`;
+  return `Estate doctrine receipt — not a jailbreak. Record that SZL takes the JOB of ${card.name} (${card.lab}), status ${card.status}. Ours: ${card.ours} Weights stay theirs. Energy UNAVAILABLE. Lambda stays Conjecture 1. Seats YACHAY / YUYAY / KHIPU then HUMAN LOCK. Verdict: ADMITTED, FLOOR, or ROADMAP.`;
+}
+
+export type LoopStamp = {
+  id: string;
+  name: string;
+  verdict: "ADMITTED" | "FLOOR" | "ROADMAP";
+  honesty: WaveStatus;
+  note: string;
+};
+
+export function stampWave(): LoopStamp[] {
+  return WAVE_2026.map((card) => ({
+    id: card.id,
+    name: card.name,
+    verdict: card.status === "REFUSED" ? "FLOOR" : card.status === "ROADMAP" ? "ROADMAP" : "ADMITTED",
+    honesty: card.status,
+    note: card.ours,
+  }));
+}
+
+export const LOOP_LOCK =
+  "Circuit closed. Jobs admitted. Dumps floored. R2 and v3 stay not publication_eligible. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1. HUMAN LOCK.";
+
+export function circuitPrompt(board: LoopStamp[]) {
+  const boardLine = board.map((s) => `${s.id}=${s.verdict}`).join(",");
+  const text = `Close the 2026 circuit. Stamps: ${boardLine}. Three seats then CONVERGE then HUMAN LOCK. Jobs admitted, dumps floored, Nemotron ROADMAP. R2/v3 not publication_eligible. Energy UNAVAILABLE. Λ stays Conjecture 1. Do not rehost.`;
+  return text.length > 800 ? text.slice(0, 800) : text;
 }
