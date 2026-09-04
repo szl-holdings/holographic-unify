@@ -235,6 +235,15 @@ export const FRONTIER_JOBS: FrontierJob[] = [
     prompt: "Admit MiMo-V2.5 as a job. Why does the 1T Pro host stay REFUSED on MIT?",
   },
   {
+    id: "apertus",
+    title: "Apertus job",
+    leader: "Swiss AI Apertus 70B",
+    ours: "Fully open EU stack. Silhouette stays Khipu.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "Admit Apertus 70B as a fully-open EU job. Why is hosting it still a twin?",
+  },
+  {
     id: "olmo",
     title: "OLMo job",
     leader: "AI2 OLMo",
