@@ -213,8 +213,8 @@ export function EvolveDeck({ onServe }: { onServe: () => void }) {
         <p className="font-mono text-xs tracking-[0.18em] text-muted uppercase">wave 2026 · keep-pushing loop · Doctrine v11</p>
         <h2 className="font-display mt-1 text-2xl">Push the frontier. Keep the silhouette.</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          One job per click. Cycle the wave. Refuse the dumps. V4-Flash, M3, Hunyuan, OLMo, Trinity, Mistral, Inkling.
-          K3 / Qwen-Max dumps REFUSED. H3 video REFUSED. Nemotron GPU ROADMAP. Λ uniqueness stays Conjecture 1.
+          One job per click. Cycle the wave. Refuse the dumps. Hy4, Flash-Next, GLM-5.3-Flash, MiMo-V2.5, V4-Flash, M3, OLMo, Trinity.
+          Hy4 770B host REFUSED. MiMo-Pro 1T host REFUSED. K3 / Qwen-Max dumps REFUSED. Nemotron GPU ROADMAP. Lambda stays Conjecture 1.
         </p>
         <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div className="rounded-lg bg-elevated p-3">

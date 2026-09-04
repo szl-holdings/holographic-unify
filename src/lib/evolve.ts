@@ -181,6 +181,50 @@ export const WAVE_2026: WaveCard[] = [
     note: "Cite the leader. Occupancy of their cluster UNAVAILABLE.",
   },
   {
+    id: "hy4",
+    name: "Hunyuan Hy4 preview",
+    lab: "Tencent",
+    job: "Long-horizon coding · 1M context preview",
+    license: "Apache-2.0",
+    ours: "Admit the Hy4 job. Refuse the 770B host. Scores stay vendor-reported.",
+    status: "HOLOGRAM",
+    admit: "hy4",
+    note: "Successor to Hy3. Apache is clean. Hosting 770B is still a dump.",
+  },
+  {
+    id: "glm53f",
+    name: "GLM-5.3-Flash",
+    lab: "Z.ai",
+    job: "MIT multimodal flash · 18B active",
+    license: "MIT",
+    ours: "Flash serve job. Pixels UNAVAILABLE. Tokens + elapsed_ms only.",
+    status: "HOLOGRAM",
+    admit: "flash",
+    note: "Sibling of GLM-5.3. Throughput is a serve job, not a trophy.",
+  },
+  {
+    id: "flashnext",
+    name: "Qwen3.8-Flash-Next",
+    lab: "Alibaba",
+    job: "Open flash path · community license",
+    license: "qwen-community",
+    ours: "Latency job through szl-serve. Not a Qwen twin. 2.4T Max stays REFUSED.",
+    status: "HOLOGRAM",
+    admit: "flash",
+    note: "Community license is not Apache. Lawyer-before-GPU still applies.",
+  },
+  {
+    id: "mimo25",
+    name: "MiMo-V2.5",
+    lab: "Xiaomi",
+    job: "Open sparse coding / long-horizon class",
+    license: "MIT",
+    ours: "Admit the V2.5 job. Refuse MiMo-V2.5-Pro 1T host.",
+    status: "HOLOGRAM",
+    admit: "mimo",
+    note: "MIT is clean. The trillion-Pro dump is still a dump.",
+  },
+  {
     id: "olmo",
     name: "OLMo",
     lab: "AI2",
@@ -318,7 +362,7 @@ export const CONVERGE_PROMPT =
   "Three Ayllu seats debate, then converge. YACHAY: how we take V4-Pro / V4-Flash / K2.7 / GLM-5.3 / MiniMax M3 / Llama 4 / Gemma 4 / gpt-oss / Inkling / Mistral Large 3 jobs without rehosting. YUYAY: which floors refuse (pixels, H3 video, K3 dump, Inkling 975B host, fake ALLOW). KHIPU: what the next honest SKU cut is, given R2 and v3 are not publication_eligible. Then one CONVERGE paragraph and HUMAN LOCK. Never claim proven trust. Λ uniqueness stays Conjecture 1.";
 
 export const SEPTEMBER_PROMPT =
-  "Keep pushing the 2026 wave. Three Ayllu seats. YACHAY: admit DeepSeek-V4-Flash, MiniMax M3, Mistral Large 3, Hunyuan Hy3, OLMo, Trinity-Large, and Nemotron 3 as jobs — cite the leader, keep the silhouette. Nemotron GPU path is ROADMAP. YUYAY: floors that still refuse (K3 dump, Inkling 975B host, Qwen 2.4T Max dump, MiniMax-H3 video, pixels). KHIPU: R2 and ReceiptAgent v3 stay not publication_eligible. Then CONVERGE and HUMAN LOCK. No invented benchmarks. Energy UNAVAILABLE. Λ uniqueness stays Conjecture 1.";
+  "Keep pushing the 2026 wave. Three Ayllu seats. YACHAY: admit DeepSeek-V4-Flash, MiniMax M3, Hunyuan Hy4 preview, GLM-5.3-Flash, Qwen3.8-Flash-Next, MiMo-V2.5, Mistral Large 3, OLMo, Trinity-Large as jobs — cite the leader, keep the silhouette. Hy4 770B host REFUSED. MiMo-V2.5-Pro 1T host REFUSED. Nemotron GPU path is ROADMAP. YUYAY: floors that still refuse (K3 dump, Inkling 975B host, Qwen 2.4T Max dump, MiniMax-H3 video, pixels). KHIPU: R2 and ReceiptAgent v3 stay not publication_eligible. Then CONVERGE and HUMAN LOCK. No invented benchmarks. Energy UNAVAILABLE. Lambda uniqueness stays Conjecture 1.";
 
 export function loopCard(index: number) {
   const i = ((index % WAVE_2026.length) + WAVE_2026.length) % WAVE_2026.length;

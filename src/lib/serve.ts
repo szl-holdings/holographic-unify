@@ -217,6 +217,24 @@ export const FRONTIER_JOBS: FrontierJob[] = [
     prompt: "Admit Hunyuan Hy3 as a job. Cite the leader. Do not invent a score. Do not host the checkpoint.",
   },
   {
+    id: "hy4",
+    title: "Hy4 preview",
+    leader: "Tencent Hunyuan Hy4 preview",
+    ours: "Admit the job. Refuse the 770B host. Vendor scores stay vendor-reported.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "Admit Hunyuan Hy4 preview as a long-horizon coding job. Why is hosting 770B still a dump even on Apache-2.0?",
+  },
+  {
+    id: "mimo",
+    title: "MiMo-V2.5 job",
+    leader: "Xiaomi MiMo-V2.5",
+    ours: "Admit the sparse coding job. Refuse MiMo-V2.5-Pro 1T host.",
+    organ: "YACHAY",
+    status: "HOLOGRAM",
+    prompt: "Admit MiMo-V2.5 as a job. Why does the 1T Pro host stay REFUSED on MIT?",
+  },
+  {
     id: "olmo",
     title: "OLMo job",
     leader: "AI2 OLMo",
@@ -359,7 +377,7 @@ export function adapterSystem(adapter: AdapterSku, method: string, rank: number,
   if (frontier === "spec" || frontier === "longctx" || frontier === "moe" || frontier === "nemotron") {
     lines.push("This job is ROADMAP. Say what would have to be MEASURED. Do not claim a kernel, a 1M window, a trillion-MoE cluster, or a vendor GPU rack.");
   }
-  if (frontier === "maverick" || frontier === "qwen38" || frontier === "inkling" || frontier === "m3") {
+  if (frontier === "maverick" || frontier === "qwen38" || frontier === "inkling" || frontier === "m3" || frontier === "hy4" || frontier === "mimo") {
     lines.push("Text is admitted through the gate. Vision/pixel occupancy is UNAVAILABLE. Do not describe generated images or video as a product. MiniMax-H3 stays REFUSED.");
   }
   if (frontier === "cyber") {
