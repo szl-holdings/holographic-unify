@@ -6,12 +6,15 @@
 from __future__ import annotations
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-HOST = "0.0.0.0"
-PORT = 7860
+HOST = os.environ.get("HOST", "0.0.0.0")
+PORT = int(os.environ.get("PORT", "7860"))
+if not 1 <= PORT <= 65535:
+    raise ValueError("PORT must be between 1 and 65535")
 
 HONESTY = {
     "surface": "SZL Holographic Unify",

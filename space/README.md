@@ -28,4 +28,6 @@ tags:
 - Λ uniqueness is **Conjecture 1**. Never proven trust.
 - Kimi-K3 dump is **REFUSED**.
 
-Immune publishes this flatten. Do not `npm ci` on Hub.
+`scripts/publish_space.py --apply` publishes this flatten from an exact, clean
+GitHub `main` checkout and waits for provider plus `/healthz` readback. Do not
+`npm ci` on Hub.
