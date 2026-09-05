@@ -34,7 +34,9 @@ Estate command hologram. **Wave 2026 admitted. PEFT on Forge. Gate on Serve.**
 Λ uniqueness is **Conjecture 1**. This is **not** [a-11-oy.com](https://a-11-oy.com), **not** the a11oy flagship, **not** an ATO.
 
 GitHub is canonical source. Hugging Face is the artifact registry, not the front door.
-Hub RUNNING only after Immune readback (`szl-holdings/immune` `secrets.HF_TOKEN`).
+Hub RUNNING is claimed only after `scripts/publish_space.py --apply` returns
+provider metadata and a successful `/healthz` readback. The publisher uses the
+active local `hf` credential without printing or copying it into GitHub.
 **Do not `npm ci` on Hub.** Flatten payload is `space/` (stdlib HTTP, GCR Python).
 
 | Surface | State |
@@ -78,7 +80,7 @@ Hub RUNNING only after Immune readback (`szl-holdings/immune` `secrets.HF_TOKEN`
 
 ## Hub runtime
 
-Flatten payload is `space/` (Immune copies those files to Space root).
+Flatten payload is `space/` (the publisher uploads those files to Space root).
 Stdlib HTTP on 7860. No npm.
 
 | Path | Honesty |
@@ -94,7 +96,14 @@ Inspect the source here. The live command surface is the Grok App Builder previe
 Hub is the Python flatten only.
 
 ```bash
-# Hub flatten (this is what Immune publishes)
+# Validate source and runtime contract without credentials.
+python3 -I -B scripts/verify_space.py
+
+# Preview the exact source-bound publication plan, then apply it explicitly.
+python3 -I -B scripts/publish_space.py
+python3 -I -B scripts/publish_space.py --apply
+
+# Run the Hub flatten directly.
 python space/server.py
 ```
 
