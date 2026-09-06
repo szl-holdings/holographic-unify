@@ -1,40 +1,41 @@
-# Copyright 2026 SZL Holdings - SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 name: Runtime contract
-
 on:
   pull_request:
   push:
     branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 concurrency:
   group: runtime-contract-${{ github.ref }}
   cancel-in-progress: false
-
 jobs:
   runtime-contract:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/publisher-pycache
     steps:
-      - name: Checkout exact source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
-          python-version: "3.12"
-      - name: Verify source runtime contract
-        run: python -I -B scripts/verify_space.py
-      - name: Build and probe production container
+          python-version: '3.12'
+      - name: Prove candidate and behavior
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          python -I -B scripts/verify_publisher_workflow.py
+          python -I -B scripts/verify_space.py
+          git diff --check
+      - name: Build and probe actual production container
         shell: bash
         run: |
           set -euo pipefail
           docker build --tag holographic-unify:ci space
           container="$(docker run --detach --publish 127.0.0.1:17860:7860 holographic-unify:ci)"
-          cleanup() { docker rm --force "$container" >/dev/null 2>&1 || true; }
-          trap cleanup EXIT
+          trap 'docker rm --force "$container" >/dev/null 2>&1 || true' EXIT
           python -I -B scripts/verify_space.py --url http://127.0.0.1:17860 --timeout 60
