@@ -8,6 +8,7 @@ on:
       - space/**
       - scripts/publish_space.py
       - scripts/verify_space.py
+      - scripts/verify_publisher_workflow.py
       - .github/workflows/deploy-hf-space.yml
   workflow_dispatch: {}
 
@@ -21,6 +22,7 @@ concurrency:
 jobs:
   publish:
     name: Publish and prove exact source
+    if: github.repository == 'szl-holdings/holographic-unify' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -31,20 +33,44 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Check out current protected main
+      - name: Check out exact triggering source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main
-          fetch-depth: 0
+          ref: ${{ github.sha }}
+          fetch-depth: 1
           persist-credentials: false
 
-      - name: Set up Python
+      - name: Prove exact protected-main subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain)"
+
+      - name: Set up exact Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          python-version: "3.12.10"
 
       - name: Install exact Hugging Face client
-        run: python -m pip install --disable-pip-version-check "huggingface_hub==1.23.0"
+        run: |
+          python -m pip install \
+            --disable-pip-version-check \
+            --no-cache-dir \
+            "huggingface_hub==1.23.0"
+
+      - name: Prove source, payload, and publisher contracts
+        run: |
+          set -euo pipefail
+          python -I -B scripts/verify_space.py
+          python -I -B scripts/verify_publisher_workflow.py
+          python -m py_compile \
+            scripts/publish_space.py \
+            scripts/verify_space.py \
+            scripts/verify_publisher_workflow.py \
+            space/server.py
+          git diff --check
 
       - name: Require governed organization publisher
         run: |
@@ -52,16 +78,48 @@ jobs:
           test -n "${HF_TOKEN:-}" || { echo "::error::HF_TOKEN is not configured"; exit 1; }
           hf auth whoami --format json | python -c 'import json,sys; d=json.load(sys.stdin); orgs=d.get("orgs") or []; names={str(x.get("name", x)) for x in orgs} if not isinstance(orgs,str) else {x.strip() for x in orgs.split(",")}; assert "SZLHOLDINGS" in names'
 
-      - name: Publish and attest the exact main closure
+      - name: Publish exact closure and require runtime readback
         run: |
           set -euo pipefail
-          mkdir -p reports
-          python -I -B scripts/publish_space.py --apply --timeout 1200 | tee reports/holographic-unify-publish.jsonl
+          python -I -B scripts/publish_space.py --apply --timeout 1200
 
-      - name: Upload immutable publication evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.2.0
+      - name: Ensure a bounded receipt exists on every terminal path
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path("artifacts/hf-publish-receipt.json")
+          if not path.exists():
+              path.parent.mkdir(parents=True, exist_ok=True)
+              receipt = {
+                  "schema": "szl.holographic-unify-publish/v1",
+                  "repository": os.environ["GITHUB_REPOSITORY"],
+                  "source_revision": os.environ["GITHUB_SHA"],
+                  "workflow_run_id": int(os.environ["GITHUB_RUN_ID"]),
+                  "workflow_run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+                  "space": "SZLHOLDINGS/holographic-unify",
+                  "status": "FAILED_BEFORE_FINAL_RECEIPT",
+                  "job_status": os.environ.get("JOB_STATUS", "unknown"),
+                  "secret_values_recorded": False,
+              }
+              path.write_text(
+                  json.dumps(receipt, sort_keys=True, separators=(",", ":")) + "\n",
+                  encoding="utf-8",
+              )
+          PY
+
+      - name: Retain immutable publication evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: holographic-unify-publish-${{ github.run_id }}-${{ github.run_attempt }}
-          path: reports/holographic-unify-publish.jsonl
+          name: holographic-unify-publish-${{ github.sha }}-${{ github.run_attempt }}
+          path: artifacts/hf-publish-receipt.json
           if-no-files-found: error
           retention-days: 90
