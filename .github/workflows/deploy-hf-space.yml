@@ -1,0 +1,67 @@
+# Copyright 2026 SZL Holdings - SPDX-License-Identifier: Apache-2.0
+name: Publish Holographic Unify Space
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - space/**
+      - scripts/publish_space.py
+      - scripts/verify_space.py
+      - .github/workflows/deploy-hf-space.yml
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-holographic-unify-space
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish and prove exact source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Check out current protected main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install exact Hugging Face client
+        run: python -m pip install --disable-pip-version-check "huggingface_hub==1.23.0"
+
+      - name: Require governed organization publisher
+        run: |
+          set -euo pipefail
+          test -n "${HF_TOKEN:-}" || { echo "::error::HF_TOKEN is not configured"; exit 1; }
+          hf auth whoami --format json | python -c 'import json,sys; d=json.load(sys.stdin); orgs=d.get("orgs") or []; names={str(x.get("name", x)) for x in orgs} if not isinstance(orgs,str) else {x.strip() for x in orgs.split(",")}; assert "SZLHOLDINGS" in names'
+
+      - name: Publish and attest the exact main closure
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          python -I -B scripts/publish_space.py --apply --timeout 1200 | tee reports/holographic-unify-publish.jsonl
+
+      - name: Upload immutable publication evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.2.0
+        with:
+          name: holographic-unify-publish-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/holographic-unify-publish.jsonl
+          if-no-files-found: error
+          retention-days: 90
