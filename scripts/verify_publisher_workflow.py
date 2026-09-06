@@ -30,13 +30,13 @@ def main() -> int:
             raise RuntimeError('external action must be commit-pinned')
         if 'pull_request_target' in body or 'secrets: inherit' in body:
             raise RuntimeError('unexpected credential-bearing trigger or inheritance')
-    suite = unittest.defaultTestLoader.discover(str(ROOT / 'tests'), pattern='test_publisher.py')
-    if suite.countTestCases() < 25:
+    suite = unittest.defaultTestLoader.discover(str(ROOT / 'tests'), pattern='test_*.py')
+    if suite.countTestCases() < 28:
         raise RuntimeError('publisher behavior contracts missing')
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     print(json.dumps({'schema': 'szl.publisher-offline-contract/v1',
         'passed': result.wasSuccessful(), 'tests_run': result.testsRun,
-        'network_access': False, 'provider_acceptance': 'NOT_CLAIMED',
+        'external_network_access': False, 'loopback_http_test': True, 'provider_acceptance': 'NOT_CLAIMED',
         'publisher_sha256': hashlib.sha256((ROOT/'scripts/publish_space.py').read_bytes()).hexdigest()}))
     return 0 if result.wasSuccessful() else 1
 
