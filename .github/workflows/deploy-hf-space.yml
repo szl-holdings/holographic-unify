@@ -8,7 +8,7 @@ on:
       - scripts/publish_space.py
       - scripts/verify_space.py
       - scripts/verify_publisher_workflow.py
-      - tests/test_publisher.py
+      - tests/test_*.py
       - .github/workflows/deploy-hf-space.yml
   workflow_dispatch: {}
 permissions:
@@ -44,7 +44,9 @@ jobs:
         run: python -m pip install --disable-pip-version-check --no-cache-dir 'huggingface_hub==1.23.0'
       - name: Publish existing target and verify immutable provider and running bytes
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          # Same fixed aliases and precedence as .github/hf-org-card-autopublish.yml.
+          # Values remain within this step; no user-supplied or GitHub token fallback.
+          HF_TOKEN: ${{ secrets.HF_ORG_TOKEN || secrets.HF_ORG_TOKEN1 || secrets.HF_TOKEN || secrets.HF_WRITE_TOKEN }}
         run: python -I -B scripts/publish_space.py --apply --timeout 1200
       - name: Retain explicit pre-publisher failure
         if: always()
