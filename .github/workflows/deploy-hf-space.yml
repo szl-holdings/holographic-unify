@@ -21,8 +21,6 @@ jobs:
     if: github.repository == 'szl-holdings/holographic-unify' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    env:
-      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/publisher-pycache
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c
