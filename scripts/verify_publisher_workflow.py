@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "deploy-hf-space.yml"
 PUBLISHER = ROOT / "scripts" / "publish_space.py"
+SERVER = ROOT / "space" / "server.py"
 EXPECTED_REPOSITORY = "szl-holdings/holographic-unify"
 EXPECTED_SPACE = "SZLHOLDINGS/holographic-unify"
 SHA_PIN = re.compile(r"^[0-9a-f]{40}$")
@@ -37,10 +38,18 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def python_invokes(workflow: str, script: str, *, suffix: str = "") -> bool:
+    """Accept bounded interpreter flags while requiring the exact script path."""
+    pattern = rf"python(?:\s+-\S+)*\s+{re.escape(script)}{re.escape(suffix)}(?:\s|$)"
+    return re.search(pattern, workflow, re.MULTILINE) is not None
+
+
 def main() -> int:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     publisher = PUBLISHER.read_text(encoding="utf-8")
+    server = SERVER.read_text(encoding="utf-8")
     ast.parse(publisher, filename=str(PUBLISHER))
+    ast.parse(server, filename=str(SERVER))
 
     require("pull_request_target" not in workflow, "publisher must not use pull_request_target")
     require("contents: write" not in workflow, "publisher repository permissions must remain read-only")
@@ -52,6 +61,7 @@ def main() -> int:
         "publisher job must be bound to the canonical repository and protected main",
     )
     require("ref: ${{ github.sha }}" in workflow, "checkout must use the exact triggering SHA")
+    require("ref: main" not in workflow, "publisher must not race a moving main ref")
     require("persist-credentials: false" in workflow, "checkout credentials must not persist")
     require(
         'test "$GITHUB_REF" = "refs/heads/main"' in workflow,
@@ -61,13 +71,29 @@ def main() -> int:
         'test "$(git rev-parse HEAD)" = "$GITHUB_SHA"' in workflow,
         "publisher must prove the checked-out commit",
     )
-    require("python scripts/verify_space.py" in workflow, "runtime closure verifier is missing")
     require(
-        "python scripts/verify_publisher_workflow.py" in workflow,
+        python_invokes(workflow, "scripts/verify_space.py"),
+        "runtime closure verifier is missing",
+    )
+    require(
+        python_invokes(workflow, "scripts/verify_publisher_workflow.py"),
         "publisher self-verification is missing",
     )
-    require("python scripts/publish_space.py --apply" in workflow, "publisher apply path is missing")
+    require(
+        python_invokes(workflow, "scripts/publish_space.py", suffix=" --apply"),
+        "publisher apply path is missing",
+    )
     require("if: always()" in workflow, "deployment receipt must be retained on failure")
+    require(
+        'Path("artifacts/hf-publish-receipt.json")' in workflow,
+        "bounded failure receipt path is missing",
+    )
+    require(
+        '"status": "FAILED_BEFORE_FINAL_RECEIPT"' in workflow,
+        "pre-publication failures must remain explicit",
+    )
+    require("set -x" not in workflow, "publisher must not enable shell trace around credentials")
+    require('echo "$HF_TOKEN"' not in workflow, "publisher must not print the credential")
 
     action_refs = USES.findall(workflow)
     require(action_refs, "workflow contains no reusable action references")
@@ -79,8 +105,7 @@ def main() -> int:
         "publisher target differs from the governed Space identity",
     )
     require(
-        'SOURCE_REPOSITORY = "szl-holdings/holographic-unify"' in
-        (ROOT / "space" / "server.py").read_text(encoding="utf-8"),
+        f'"github": "{EXPECTED_REPOSITORY}"' in server,
         "runtime source repository differs from the publisher authority",
     )
     require("exact_bytes" in publisher, "publisher must verify exact uploaded bytes")
@@ -93,6 +118,7 @@ def main() -> int:
         "space": EXPECTED_SPACE,
         "workflow_sha256": sha256(WORKFLOW),
         "publisher_sha256": sha256(PUBLISHER),
+        "server_sha256": sha256(SERVER),
         "network_access": False,
         "credential_access": False,
         "status": "PASS",
