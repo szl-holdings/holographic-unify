@@ -175,7 +175,13 @@ def wait_for_runtime(api: Any, revision: str, files: Mapping[str, bytes], source
     while time.monotonic() < deadline:
         info = api.space_info(SPACE_ID)
         require(exact_sha(info.sha) == revision, "PROVIDER_SUPERSEDED")
-        runtime = info.runtime or {}
+        runtime = info.runtime
+        if runtime is None:
+            runtime = {}
+        elif not isinstance(runtime, Mapping):
+            # The pinned Hub client exposes SpaceRuntime, not a dictionary.
+            runtime = getattr(runtime, "raw", None)
+        require(isinstance(runtime, Mapping), "INVALID_PROVIDER_RUNTIME")
         stage = runtime.get("stage")
         require(stage not in {"BUILD_ERROR", "RUNTIME_ERROR", "PAUSED", "STOPPED"}, "RUNTIME_TERMINAL")
         if stage == "RUNNING" and runtime.get("sha") == revision:
