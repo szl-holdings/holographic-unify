@@ -8,7 +8,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
+from types import MappingProxyType, SimpleNamespace
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -145,6 +145,70 @@ class ProviderTests(unittest.TestCase):
                       lambda:self.saved.append(copy.deepcopy(self.receipt)),
                       kw.pop('fresh',lambda:A), read=kw.pop('read',self.read),
                       timeout=kw.pop('timeout',1), sleep=lambda _:None, **kw)
+
+    def use_runtime_shape(self, shape):
+        original = self.api.space_info
+        def space_info(target):
+            info = original(target)
+            info.runtime = shape(info.runtime)
+            return info
+        self.api.space_info = space_info
+
+    def test_sdk_runtime_object_completes_full_publication(self):
+        self.use_runtime_shape(lambda raw: SimpleNamespace(stage=raw['stage'], raw=raw))
+        self.execute()
+        self.assertEqual(self.receipt['status'], 'RUNTIME_VERIFIED')
+        self.assertEqual(self.receipt['runtime_revision'], C)
+        self.assertEqual(len(self.api.commits), 1)
+
+    def test_read_only_runtime_mapping_is_supported(self):
+        self.use_runtime_shape(MappingProxyType)
+        self.execute()
+        self.assertEqual(self.receipt['status'], 'RUNTIME_VERIFIED')
+        self.assertEqual(self.receipt['runtime_revision'], C)
+
+    def test_malformed_sdk_runtime_fails_with_bounded_error(self):
+        cases = [SimpleNamespace(), SimpleNamespace(raw=None),
+                 SimpleNamespace(raw=[]), SimpleNamespace(raw='RUNNING'),
+                 [], 'RUNNING', False, 0]
+        for runtime in cases:
+            self.setUp()
+            self.use_runtime_shape(lambda _, value=runtime: value)
+            with self.subTest(runtime=runtime), self.assertRaisesRegex(
+                    p.PublicationError, '^INVALID_PROVIDER_RUNTIME$'):
+                self.execute()
+            self.assertEqual(self.saved[-1]['status'], 'PROVIDER_VERIFIED')
+
+    def test_absent_runtime_or_missing_sdk_fields_cannot_pass(self):
+        cases = [None, SimpleNamespace(raw={}), SimpleNamespace(raw={'sha': C}),
+                 SimpleNamespace(raw={'stage': 'RUNNING'})]
+        for runtime in cases:
+            self.setUp()
+            self.use_runtime_shape(lambda _, value=runtime: value)
+            with self.subTest(runtime=runtime), patch.object(
+                    p.time, 'monotonic', side_effect=[0, 0, 0, 2]), self.assertRaisesRegex(
+                    p.PublicationError, '^RUNTIME_TIMEOUT$'):
+                self.execute()
+            self.assertEqual(self.saved[-1]['status'], 'PROVIDER_VERIFIED')
+
+    def test_sdk_runtime_stale_revision_cannot_promote(self):
+        self.use_runtime_shape(lambda _: SimpleNamespace(raw={'stage': 'RUNNING', 'sha': B}))
+        with patch.object(self, 'read', wraps=self.read) as read, patch.object(
+                p.time, 'monotonic', side_effect=[0, 0, 0, 2]), self.assertRaisesRegex(
+                p.PublicationError, '^RUNTIME_TIMEOUT$'):
+            self.execute()
+        read.assert_not_called()
+        self.assertEqual(self.saved[-1]['status'], 'PROVIDER_VERIFIED')
+
+    def test_sdk_runtime_terminal_states_remain_rejected(self):
+        for stage in ('BUILD_ERROR', 'RUNTIME_ERROR', 'PAUSED', 'STOPPED'):
+            self.setUp()
+            self.use_runtime_shape(lambda raw, value=stage: SimpleNamespace(
+                raw={'stage': value, 'sha': raw['sha']}))
+            with self.subTest(stage=stage), self.assertRaisesRegex(
+                    p.PublicationError, '^RUNTIME_TERMINAL$'):
+                self.execute()
+            self.assertEqual(self.saved[-1]['status'], 'PROVIDER_VERIFIED')
 
     def test_one_atomic_commit_is_bound_to_parent_and_read_back(self):
         self.execute()
