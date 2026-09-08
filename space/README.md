@@ -1,6 +1,6 @@
 ---
 title: SZL Holographic Unify
-emoji: 🜂
+emoji: 🔮
 colorFrom: yellow
 colorTo: gray
 sdk: docker
