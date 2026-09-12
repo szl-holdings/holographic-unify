@@ -85,14 +85,16 @@ class Handler(BaseHTTPRequestHandler):
     def respond(self, head: bool = False) -> None:
         path = self.path.split("?", 1)[0]
         code, kind = 200, "application/json"
-        if path in {"/healthz", "/api/honesty"}:
-            body = json.dumps({**HONESTY, "ok": True}).encode()
+        if path in {"/healthz", "/readyz", "/api/honesty"}:
+            body = json.dumps({**HONESTY, "ok": True, "ready": True}).encode()
         elif path in {"/api/build-info", "/deployment.json"}:
             try:
                 document, revision = deployment_bytes()
                 body = document if path == "/deployment.json" else json.dumps({
                     "schema": "szl.build-info/v1", "source_repository": SOURCE,
-                    "source_revision": revision, "build": {"revision": revision},
+                    "source_revision": revision,
+                    "build": {"state": "OBSERVED", "revision": revision},
+                    "receipt_minted": False,
                     "state": "LOCAL_BYTES_VERIFIED", "signature": "UNSIGNED-honest",
                 }).encode()
             except (OSError, ValueError, TypeError, KeyError):

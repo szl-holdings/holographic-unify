@@ -48,6 +48,12 @@ jobs:
           # Values remain within this step; no user-supplied or GitHub token fallback.
           HF_TOKEN: ${{ secrets.HF_ORG_TOKEN || secrets.HF_ORG_TOKEN1 || secrets.HF_TOKEN || secrets.HF_WRITE_TOKEN }}
         run: python -I -B scripts/publish_space.py --apply --timeout 1200
+      - name: Verify live readiness and exact application source identity
+        run: >-
+          python -I -B scripts/verify_space.py
+          --url https://szlholdings-holographic-unify.hf.space
+          --timeout 120
+          --expected-source-revision "$GITHUB_SHA"
       - name: Retain explicit pre-publisher failure
         if: always()
         run: |

@@ -43,8 +43,11 @@ class RuntimeHttpTests(unittest.TestCase):
         self.assertEqual(status,200);self.assertEqual(body,self.files['deployment.json'])
         status,body,_=self.request('/api/build-info')
         self.assertEqual(status,200)
-        self.assertEqual(json.loads(body)['source_revision'],'a'*40)
-        self.assertEqual(json.loads(body)['source_repository'],p.SOURCE_REPOSITORY)
+        info=json.loads(body)
+        self.assertEqual(info['source_revision'],'a'*40)
+        self.assertEqual(info['source_repository'],p.SOURCE_REPOSITORY)
+        self.assertEqual(info['build'],{'state':'OBSERVED','revision':'a'*40})
+        self.assertIs(info['receipt_minted'],False)
     def test_missing_and_tampered_identity_return_unavailable_not_html(self):
         (self.root/'index.html').write_text('tampered')
         status,body,_=self.request('/api/build-info')
@@ -58,6 +61,9 @@ class RuntimeHttpTests(unittest.TestCase):
         self.assertEqual(int(headers['Content-Length']),len(self.files['deployment.json']))
         self.assertEqual(self.request('/missing','HEAD')[0],404)
         self.assertEqual(self.request('/healthz')[0],200)
+        status,body,_=self.request('/readyz')
+        self.assertEqual(status,200)
+        self.assertIs(json.loads(body)['ready'],True)
 
 
 if __name__=='__main__': unittest.main(verbosity=2)
