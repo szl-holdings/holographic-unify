@@ -86,7 +86,7 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         code, kind = 200, "application/json"
         if path in {"/healthz", "/api/honesty"}:
-            body = json.dumps({**HONESTY, "ok": True, "ready": True}).encode()
+            body = json.dumps({**HONESTY, "ok": True}).encode()
         elif path == "/readyz":
             try:
                 _, revision = deployment_bytes()
