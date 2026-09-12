@@ -34,7 +34,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker build --tag holographic-unify:ci space
+          runtime_context="$(mktemp -d)"
+          trap 'rm -rf "$runtime_context"' EXIT
+          SOURCE_SHA="$SOURCE_SHA" RUNTIME_CONTEXT="$runtime_context" python -I -B - <<'PY'
+          import os
+          import runpy
+          from pathlib import Path
+
+          payload = runpy.run_path("scripts/publish_space.py")["payload"](os.environ["SOURCE_SHA"])
+          target = Path(os.environ["RUNTIME_CONTEXT"])
+          for name, body in payload.items():
+              (target / name).write_bytes(body)
+          PY
+          docker build --tag holographic-unify:ci "$runtime_context"
           container="$(docker run --detach --publish 127.0.0.1:17860:7860 holographic-unify:ci)"
-          trap 'docker rm --force "$container" >/dev/null 2>&1 || true' EXIT
+          trap 'docker rm --force "$container" >/dev/null 2>&1 || true; rm -rf "$runtime_context"' EXIT
           python -I -B scripts/verify_space.py --url http://127.0.0.1:17860 --timeout 60

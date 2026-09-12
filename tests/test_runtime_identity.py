@@ -53,6 +53,11 @@ class RuntimeHttpTests(unittest.TestCase):
         status,body,_=self.request('/api/build-info')
         self.assertEqual(status,503)
         self.assertEqual(json.loads(body)['state'],'SOURCE_BINDING_UNAVAILABLE')
+        status,body,_=self.request('/readyz')
+        self.assertEqual(status,503)
+        self.assertEqual(json.loads(body),{
+            'ok':False,'ready':False,'state':'SOURCE_BINDING_UNAVAILABLE'
+        })
         (self.root/'deployment.json').unlink()
         self.assertEqual(self.request('/deployment.json')[0],503)
     def test_head_and_unknown_routes_have_truthful_status(self):

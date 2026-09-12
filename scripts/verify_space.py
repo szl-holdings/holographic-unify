@@ -7,9 +7,11 @@ import argparse
 import json
 import os
 import re
+import runpy
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.request
 from pathlib import Path
@@ -132,31 +134,37 @@ def verify_url(
 
 
 def verify_local(timeout: float) -> dict[str, Any]:
-    with socket.socket() as probe:
-        probe.bind(("127.0.0.1", 0))
-        port = probe.getsockname()[1]
-    env = os.environ.copy()
-    env.update({"HOST": "127.0.0.1", "PORT": str(port), "PYTHONDONTWRITEBYTECODE": "1"})
-    process = subprocess.Popen(
-        [sys.executable, "-I", "-B", str(SPACE / "server.py")],
-        cwd=SPACE,
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    try:
-        result = verify_url(f"http://127.0.0.1:{port}", timeout)
-        require(process.poll() is None, "server exited during the contract probe")
-        result["mode"] = "local"
-        return result
-    finally:
-        process.terminate()
+    publisher = runpy.run_path(str(ROOT / "scripts" / "publish_space.py"))
+    staged_payload = publisher["payload"]("0" * 40)
+    with tempfile.TemporaryDirectory() as temporary:
+        runtime = Path(temporary)
+        for name, body in staged_payload.items():
+            (runtime / name).write_bytes(body)
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            port = probe.getsockname()[1]
+        env = os.environ.copy()
+        env.update({"HOST": "127.0.0.1", "PORT": str(port), "PYTHONDONTWRITEBYTECODE": "1"})
+        process = subprocess.Popen(
+            [sys.executable, "-I", "-B", str(runtime / "server.py")],
+            cwd=runtime,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
         try:
-            process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=5)
+            result = verify_url(f"http://127.0.0.1:{port}", timeout)
+            require(process.poll() is None, "server exited during the contract probe")
+            result["mode"] = "local"
+            return result
+        finally:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
 
 
 def main() -> int:

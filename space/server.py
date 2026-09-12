@@ -85,8 +85,19 @@ class Handler(BaseHTTPRequestHandler):
     def respond(self, head: bool = False) -> None:
         path = self.path.split("?", 1)[0]
         code, kind = 200, "application/json"
-        if path in {"/healthz", "/readyz", "/api/honesty"}:
+        if path in {"/healthz", "/api/honesty"}:
             body = json.dumps({**HONESTY, "ok": True, "ready": True}).encode()
+        elif path == "/readyz":
+            try:
+                _, revision = deployment_bytes()
+                body = json.dumps({
+                    **HONESTY,
+                    "ok": True,
+                    "ready": True,
+                    "source_revision": revision,
+                }).encode()
+            except (OSError, ValueError, TypeError, KeyError):
+                code, body = 503, b'{"ok":false,"ready":false,"state":"SOURCE_BINDING_UNAVAILABLE"}'
         elif path in {"/api/build-info", "/deployment.json"}:
             try:
                 document, revision = deployment_bytes()
