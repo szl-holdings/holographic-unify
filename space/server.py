@@ -87,12 +87,25 @@ class Handler(BaseHTTPRequestHandler):
         code, kind = 200, "application/json"
         if path in {"/healthz", "/api/honesty"}:
             body = json.dumps({**HONESTY, "ok": True}).encode()
+        elif path == "/readyz":
+            try:
+                _, revision = deployment_bytes()
+                body = json.dumps({
+                    **HONESTY,
+                    "ok": True,
+                    "ready": True,
+                    "source_revision": revision,
+                }).encode()
+            except (OSError, ValueError, TypeError, KeyError):
+                code, body = 503, b'{"ok":false,"ready":false,"state":"SOURCE_BINDING_UNAVAILABLE"}'
         elif path in {"/api/build-info", "/deployment.json"}:
             try:
                 document, revision = deployment_bytes()
                 body = document if path == "/deployment.json" else json.dumps({
                     "schema": "szl.build-info/v1", "source_repository": SOURCE,
-                    "source_revision": revision, "build": {"revision": revision},
+                    "source_revision": revision,
+                    "build": {"state": "OBSERVED", "revision": revision},
+                    "receipt_minted": False,
                     "state": "LOCAL_BYTES_VERIFIED", "signature": "UNSIGNED-honest",
                 }).encode()
             except (OSError, ValueError, TypeError, KeyError):
