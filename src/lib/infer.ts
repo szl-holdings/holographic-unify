@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { GROK_MODEL, postGrok } from "./grok-contract";
 import type { AdapterSku, PeftMethod } from "./peft";
 import { adapterSystem, type ServeRequest, type ServeResult } from "./serve";
 
@@ -29,34 +30,26 @@ function parseInput(input: unknown): ServeRequest {
 export const runServe = createServerFn({ method: "POST" })
   .validator((input: unknown) => parseInput(input))
   .handler(async ({ data }): Promise<ServeResult> => {
-    const apiKey = process.env.XAI_API_KEY;
-    if (!apiKey) {
-      return { ok: false, error: "Gate UNAVAILABLE — no runtime key in this environment." };
-    }
-
     const system = adapterSystem(data.adapter, data.method, data.rank, data.frontier);
-    const t0 = Date.now();
-    const res = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "grok-4.5",
+    // postGrok fails closed before any request when XAI_API_KEY is absent or blank,
+    // and bounds every request with a timeout, capped retries and a total deadline.
+    const call = await postGrok(
+      {
+        model: GROK_MODEL,
         temperature: 0.35,
         max_tokens: data.maxTokens,
         messages: [
           { role: "system", content: system },
           { role: "user", content: data.prompt },
         ],
-      }),
-    });
-    const elapsedMs = Date.now() - t0;
-    if (!res.ok) {
-      return { ok: false, error: `Gate error ${res.status}. Honest fail-closed.` };
+      },
+      process.env.XAI_API_KEY,
+    );
+    if (!call.ok) {
+      return { ok: false, error: call.error };
     }
-    const body = (await res.json()) as {
+    const { elapsedMs, attempts } = call;
+    const body = call.body as {
       model?: string;
       choices?: { message?: { content?: string } }[];
       usage?: { completion_tokens?: number; prompt_tokens?: number };
@@ -68,9 +61,10 @@ export const runServe = createServerFn({ method: "POST" })
     return {
       ok: true,
       text,
-      model: body.model ?? "grok-4.5",
+      model: body.model ?? GROK_MODEL,
       runtime: "xAI gate hologram · not SZL-Khipu-1.5B-GGUF weights · GPU vLLM ROADMAP",
       elapsedMs,
+      attempts,
       completionTokens: body.usage?.completion_tokens ?? 0,
       promptTokens: body.usage?.prompt_tokens ?? 0,
       energy: "UNAVAILABLE",

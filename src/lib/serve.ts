@@ -333,7 +333,10 @@ export type ServeOk = {
   text: string;
   model: string;
   runtime: string;
+  /** Wall-clock from the first request to the accepted response, including any retry waits. */
   elapsedMs: number;
+  /** Provider requests sent for this completion (1 unless a 429/5xx/network error was retried). */
+  attempts: number;
   completionTokens: number;
   promptTokens: number;
   energy: "UNAVAILABLE";
