@@ -155,6 +155,12 @@ test("an unlisted model id fails closed with zero fetch calls, even with a key",
 });
 
 test("parameters reasoning models reject fail closed with zero fetch calls", async (t) => {
+  // Lock the list itself: the loops below iterate it, so a shrunken list would pass them.
+  assert.deepEqual(
+    [...REASONING_REJECTED_PARAMS].sort(),
+    ["frequencyPenalty", "frequency_penalty", "presencePenalty", "presence_penalty", "stop"],
+  );
+  assert.ok(Object.isFrozen(REASONING_REJECTED_PARAMS));
   const stub = t.mock.method(globalThis, "fetch", async () => {
     throw new Error("must not fetch");
   });
