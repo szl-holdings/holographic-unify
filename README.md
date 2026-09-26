@@ -71,7 +71,7 @@ active local `hf` credential without printing or copying it into GitHub.
 | --- | --- |
 | Command hologram | LIVE in Grok App Builder |
 | PEFT compose | HOLOGRAM · BLUEPRINT_NOT_TRAINED until keyed |
-| xAI gate | grok-4.5 · labelled not-Khipu-weights |
+| xAI gate | grok-4.7 (rollback: grok-4.5) · labelled not-Khipu-weights |
 | GPU vLLM / Unsloth | ROADMAP |
 | Energy joule | UNAVAILABLE |
 | Λ uniqueness | Conjecture 1 |
@@ -110,5 +110,12 @@ python space/server.py
 Auth and database stay off. Completions on the live surface use the server
 `XAI_API_KEY` when present, user-initiated, capped. Without a key, the gate
 fails closed — it does not mock.
+
+The gate model is `DEFAULT_GROK_MODEL` (`grok-4.7`) in `src/lib/grok-contract.ts`.
+The server-side `SZL_GROK_MODEL` may select only an id in `ALLOWED_GROK_MODELS`
+(`grok-4.7`, or `grok-4.5` as the single rollback target); blank uses the default.
+Any other value fails closed as `Gate UNAVAILABLE` with no provider request. It
+never falls back to the default. Adding an id to the allowlist is a model change
+and needs its own review.
 
 Apache-2.0 · Doctrine v11 LOCKED · Copyright 2026 SZL Holdings.
