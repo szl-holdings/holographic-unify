@@ -1,23 +1,27 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  ALLOWED_GROK_MODELS,
+  DEFAULT_GROK_MODEL,
+  GATE_MODEL_UNAVAILABLE,
   GATE_UNAVAILABLE,
-  GROK_MODEL,
   GROK_POLICY,
+  REASONING_REJECTED_PARAMS,
   XAI_CHAT_COMPLETIONS_URL,
   backoffMs,
   postGrok,
+  resolveGrokModel,
   retryAfterMs,
   type GrokPolicy,
 } from "./grok-contract.ts";
 
 const KEY = "test-only-placeholder";
-const payload = { model: GROK_MODEL, max_tokens: 24, messages: [{ role: "user", content: "hi" }] };
+const payload = { model: DEFAULT_GROK_MODEL, max_tokens: 24, messages: [{ role: "user", content: "hi" }] };
 type Init = RequestInit | undefined;
 
 function completion() {
   return Response.json({
-    model: GROK_MODEL,
+    model: DEFAULT_GROK_MODEL,
     choices: [{ message: { content: "measured" }, finish_reason: "stop" }],
     usage: { prompt_tokens: 3, completion_tokens: 1 },
   });
@@ -64,7 +68,9 @@ test("policy stays inside the estate transport bounds", () => {
   assert.ok(GROK_POLICY.retryAfterCapMs > 0 && GROK_POLICY.retryAfterCapMs <= 30_000);
   assert.ok(GROK_POLICY.attemptTimeoutMs > 0 && GROK_POLICY.attemptTimeoutMs <= GROK_POLICY.deadlineMs);
   assert.ok(Number.isFinite(GROK_POLICY.deadlineMs));
-  assert.equal(GROK_MODEL, "grok-4.5");
+  assert.equal(DEFAULT_GROK_MODEL, "grok-4.7");
+  assert.deepEqual(ALLOWED_GROK_MODELS, ["grok-4.7", "grok-4.5"]);
+  assert.ok(Object.isFrozen(ALLOWED_GROK_MODELS));
   assert.ok(Object.isFrozen(GROK_POLICY));
 });
 
@@ -95,13 +101,78 @@ test("sends the pinned model, key only in Authorization, under an abort signal",
   const headers = seenInit?.headers as Record<string, string>;
   assert.equal(headers.Authorization, `Bearer ${KEY}`);
   const sent = JSON.parse(String(seenInit?.body));
-  assert.equal(sent.model, "grok-4.5");
+  assert.equal(sent.model, "grok-4.7");
+  for (const name of REASONING_REJECTED_PARAMS) assert.equal(name in sent, false, `${name} must not be sent`);
   assert.doesNotMatch(String(seenInit?.body), new RegExp(KEY));
   if (out.ok) {
     assert.equal(out.attempts, 1);
     assert.ok(out.elapsedMs >= 0);
     assert.equal((out.body.choices as { message: { content: string } }[])[0].message.content, "measured");
   }
+});
+
+test("SZL_GROK_MODEL: blank uses the default, the rollback target is honoured, trimmed", () => {
+  for (const blank of [undefined, "", "   \n"]) {
+    assert.deepEqual(resolveGrokModel(blank), { ok: true, model: "grok-4.7" });
+  }
+  assert.deepEqual(resolveGrokModel("grok-4.7"), { ok: true, model: "grok-4.7" });
+  assert.deepEqual(resolveGrokModel("grok-4.5"), { ok: true, model: "grok-4.5" });
+  assert.deepEqual(resolveGrokModel("  grok-4.5\n"), { ok: true, model: "grok-4.5" });
+});
+
+test("SZL_GROK_MODEL outside the allowlist fails closed and never falls back to the default", () => {
+  // grok-4.6 is a real, well-formed xAI id that is not reviewed for this surface.
+  for (const bad of ["grok-4.6", "grok-4.7-latest", "grok-latest", "GROK-4.7", "grok-4", "grok-4.5 grok-4.7", "grok-4.70"]) {
+    const out = resolveGrokModel(bad);
+    assert.deepEqual(out, { ok: false, error: GATE_MODEL_UNAVAILABLE }, `"${bad}"`);
+    if (!out.ok) assert.equal(out.error.includes(bad), false, "the configured value is never echoed");
+  }
+});
+
+test("the rollback target is sent when SZL_GROK_MODEL selects it", async (t) => {
+  let sentModel: unknown;
+  t.mock.method(globalThis, "fetch", async (_url: unknown, init?: RequestInit) => {
+    sentModel = JSON.parse(String(init?.body)).model;
+    return completion();
+  });
+  const resolved = resolveGrokModel("grok-4.5");
+  assert.equal(resolved.ok, true);
+  if (!resolved.ok) return;
+  const out = await postGrok({ ...payload, model: resolved.model }, KEY);
+  assert.equal(out.ok, true);
+  assert.equal(sentModel, "grok-4.5");
+});
+
+test("an unlisted model id fails closed with zero fetch calls, even with a key", async (t) => {
+  const stub = t.mock.method(globalThis, "fetch", async () => {
+    throw new Error("must not fetch");
+  });
+  for (const model of ["grok-4.6", "grok-4.7-latest", "", undefined, 47]) {
+    const out = await postGrok({ ...payload, model }, KEY);
+    assert.deepEqual(out, { ok: false, error: GATE_MODEL_UNAVAILABLE, attempts: 0 });
+  }
+  assert.equal(stub.mock.callCount(), 0);
+});
+
+test("parameters reasoning models reject fail closed with zero fetch calls", async (t) => {
+  // Lock the list itself: the loops below iterate it, so a shrunken list would pass them.
+  assert.deepEqual(
+    [...REASONING_REJECTED_PARAMS].sort(),
+    ["frequencyPenalty", "frequency_penalty", "presencePenalty", "presence_penalty", "stop"],
+  );
+  assert.ok(Object.isFrozen(REASONING_REJECTED_PARAMS));
+  const stub = t.mock.method(globalThis, "fetch", async () => {
+    throw new Error("must not fetch");
+  });
+  for (const name of REASONING_REJECTED_PARAMS) {
+    const out = await postGrok({ ...payload, [name]: name === "stop" ? ["\n\n\n"] : 0 }, KEY);
+    assert.equal(out.ok, false);
+    if (!out.ok) {
+      assert.equal(out.attempts, 0);
+      assert.match(out.error, /reasoning models reject/);
+    }
+  }
+  assert.equal(stub.mock.callCount(), 0);
 });
 
 test("per-request timeout aborts and fails closed without retry", { timeout: 5_000 }, async (t) => {

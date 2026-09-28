@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { GROK_MODEL, postGrok } from "./grok-contract";
+import { postGrok, resolveGrokModel } from "./grok-contract";
 import type { AdapterSku, PeftMethod } from "./peft";
 import { adapterSystem, type ServeRequest, type ServeResult } from "./serve";
 
@@ -30,12 +30,19 @@ function parseInput(input: unknown): ServeRequest {
 export const runServe = createServerFn({ method: "POST" })
   .validator((input: unknown) => parseInput(input))
   .handler(async ({ data }): Promise<ServeResult> => {
+    // Server-side only. Empty uses DEFAULT_GROK_MODEL; an id outside
+    // ALLOWED_GROK_MODELS fails closed here with no provider request.
+    const resolved = resolveGrokModel(process.env.SZL_GROK_MODEL);
+    if (!resolved.ok) {
+      return { ok: false, error: resolved.error };
+    }
+    const { model } = resolved;
     const system = adapterSystem(data.adapter, data.method, data.rank, data.frontier);
     // postGrok fails closed before any request when XAI_API_KEY is absent or blank,
     // and bounds every request with a timeout, capped retries and a total deadline.
     const call = await postGrok(
       {
-        model: GROK_MODEL,
+        model,
         temperature: 0.35,
         max_tokens: data.maxTokens,
         messages: [
@@ -61,7 +68,7 @@ export const runServe = createServerFn({ method: "POST" })
     return {
       ok: true,
       text,
-      model: body.model ?? GROK_MODEL,
+      model: body.model ?? model,
       runtime: "xAI gate hologram · not SZL-Khipu-1.5B-GGUF weights · GPU vLLM ROADMAP",
       elapsedMs,
       attempts,
