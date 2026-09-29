@@ -73,3 +73,9 @@ jobs:
           test ! -e node_modules
           node --version
           npm run test:grok
+      - name: Run offline catalog public-link guard (no dependency install)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e node_modules
+          npm run test:catalog
