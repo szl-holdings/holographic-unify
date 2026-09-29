@@ -48,7 +48,7 @@ updates:
 
   - package-ecosystem: "docker"
     # The Dockerfile published to the Hub. scripts/verify_space.py holds its
-    # runtime at python:3.12-slim, so only the pinned digest is refreshed here;
+    # runtime at python:3.14-slim, so only the pinned digest is refreshed here;
     # a Python minor or major move is a deliberate contract change, not a bump.
     directory: "/space"
     schedule:

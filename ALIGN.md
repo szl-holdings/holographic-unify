@@ -242,7 +242,7 @@ if __name__ == "__main__":
 ## After it runs
 
 1. Open https://huggingface.co/spaces/SZLHOLDINGS/holographic-unify
-2. If the Space is BUILD_ERROR, check the Dockerfile is the flatten (`FROM mirror.gcr.io/library/python:3.12-slim`) — never a Node `npm ci`.
+2. If the Space is BUILD_ERROR, check the Dockerfile is the flatten (`FROM mirror.gcr.io/library/python:3.14-slim`) — never a Node `npm ci`.
 3. If the Space is behind `main`, dispatch the committed writer instead of uploading by hand:
 
 ```bash
