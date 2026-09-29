@@ -1,5 +1,11 @@
 # SZL align payload — paste this whole file to Grok in terminal
 
+> **Superseded for publication (2026-09-29).** The Space `SZLHOLDINGS/holographic-unify`
+> has one writer: the committed workflow `.github/workflows/deploy-hf-space.yml`
+> (push to `main`, or `gh workflow run deploy-hf-space.yml -R szl-holdings/holographic-unify`).
+> `scripts/publish_space.py --apply` refuses to run outside that workflow. Do not upload
+> to the Space from a workstation. The rest of this file is kept as the original payload.
+
 Goal: GitHub org `szl-holdings` aligned, and **this hologram lives on Hugging Face as a Space** (not a model dump, not `npm ci`).
 
 Recommended Hub surface: **Space** `SZLHOLDINGS/holographic-unify`  
@@ -237,10 +243,10 @@ if __name__ == "__main__":
 
 1. Open https://huggingface.co/spaces/SZLHOLDINGS/holographic-unify
 2. If the Space is BUILD_ERROR, check the Dockerfile is the flatten (`FROM mirror.gcr.io/library/python:3.12-slim`) — never a Node `npm ci`.
-3. If HF_TOKEN was missing, from the holographic-unify checkout:
+3. If the Space is behind `main`, dispatch the committed writer instead of uploading by hand:
 
 ```bash
-huggingface-cli upload SZLHOLDINGS/holographic-unify space . --repo-type space
+gh workflow run deploy-hf-space.yml -R szl-holdings/holographic-unify --ref main
 ```
 
 4. Print `szl-align-receipt.json`. Never set `proven_trust` true.
