@@ -54,7 +54,7 @@ def verify_payload() -> None:
 
     require("sdk: docker" in readme, "Space README must declare sdk: docker")
     require("app_port: 7860" in readme, "Space README must declare port 7860")
-    require("mirror.gcr.io/library/python:3.12-slim" in dockerfile, "runtime image changed")
+    require("mirror.gcr.io/library/python:3.14-slim" in dockerfile, "runtime image changed")
     docker_instructions = [
         line.strip().lower()
         for line in dockerfile.splitlines()
