@@ -106,7 +106,7 @@ export const SPACES: SpaceRow[] = [
   { id: "szl-kernels-live", sdk: "static", github: "szl-holdings/szl-kernels-live", role: "Kernel suite hub.", audience: "dev", organ: "KHIPU" },
   { id: "szl-govsign-live", sdk: "static", github: "szl-holdings/szl-govsign", role: "DSSE sign hologram.", audience: "dev", organ: "YAWAR" },
   { id: "szl-blocked-live", sdk: "static", github: "szl-holdings/szl-blocked", role: "Honest BLOCKED surface.", audience: "dev", organ: "YUYAY" },
-  { id: "szl-estate-live", sdk: "static", github: "szl-holdings/szl-estate-os", role: "Estate control plane mirror.", audience: "both", organ: "YACHAY" },
+  { id: "szl-estate-live", sdk: "static", github: null, role: "Estate control plane mirror.", audience: "both", organ: "YACHAY" },
   { id: "szl-forge-lab", sdk: "static", github: "szl-holdings/szl-forge", role: "Sovereign fine-tune kit.", audience: "dev", organ: "KHIPU" },
   { id: "szl-model-inference-lab", sdk: "docker", github: null, role: "Inference lab.", audience: "dev", organ: "KHIPU" },
   { id: "governed-agent-bench", sdk: "gradio", github: null, role: "Agent bench. Still Gradio SDK — residual boot risk.", audience: "dev", organ: "YACHAY" },
