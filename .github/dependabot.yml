@@ -31,10 +31,8 @@ updates:
           - "*"
 
   - package-ecosystem: "docker"
-    # "/" is the whole-repo Dockerfile; "/space" is the Dockerfile published to the Hub.
-    directories:
-      - "/"
-      - "/space"
+    # The whole-repo Dockerfile: tag and digest updates.
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -45,5 +43,26 @@ updates:
     open-pull-requests-limit: 5
     groups:
       docker:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    # The Dockerfile published to the Hub. scripts/verify_space.py holds its
+    # runtime at python:3.12-slim, so only the pinned digest is refreshed here;
+    # a Python minor or major move is a deliberate contract change, not a bump.
+    directory: "/space"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "library/python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+    groups:
+      docker-space:
         patterns:
           - "*"
