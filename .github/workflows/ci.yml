@@ -50,3 +50,26 @@ jobs:
           container="$(docker run --detach --publish 127.0.0.1:17860:7860 holographic-unify:ci)"
           trap 'docker rm --force "$container" >/dev/null 2>&1 || true; rm -rf "$runtime_context"' EXIT
           python -I -B scripts/verify_space.py --url http://127.0.0.1:17860 --timeout 60
+  grok-contract:
+    name: grok-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Run offline xAI gate contract suite (no dependency install)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test ! -e node_modules
+          node --version
+          npm run test:grok
