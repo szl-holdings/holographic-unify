@@ -31,7 +31,10 @@ updates:
           - "*"
 
   - package-ecosystem: "docker"
-    directory: "/"
+    # "/" is the whole-repo Dockerfile; "/space" is the Dockerfile published to the Hub.
+    directories:
+      - "/"
+      - "/space"
     schedule:
       interval: "weekly"
       day: "monday"

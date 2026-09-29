@@ -16,14 +16,33 @@ jobs:
     timeout-minutes: 15
     env:
       SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      # szl-holdings/.github hf-card toolkit (schema + D10 linter), pinned to a reviewed commit.
+      HF_CARD_TOOLKIT_SHA: 4579c55d8a9d03f6d5e24fd2ab17bcc947d4bcd3
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ env.SOURCE_SHA }}
           persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: szl-holdings/.github
+          ref: ${{ env.HF_CARD_TOOLKIT_SHA }}
+          path: .hf-card-toolkit
+          persist-credentials: false
+          sparse-checkout: hf-card
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: '3.12'
+      - name: Lint the Space card against the org card contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .hf-card-toolkit rev-parse HEAD)" = "$HF_CARD_TOOLKIT_SHA"
+          python -m venv "$RUNNER_TEMP/hf-card-venv"
+          venv_python="$RUNNER_TEMP/hf-card-venv/bin/python"
+          requirements=.hf-card-toolkit/hf-card/requirements.txt
+          "$venv_python" -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r "$requirements"
+          "$venv_python" .hf-card-toolkit/hf-card/lint.py space/README.md --type space
       - name: Prove candidate and behavior
         run: |
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
@@ -50,6 +69,15 @@ jobs:
           container="$(docker run --detach --publish 127.0.0.1:17860:7860 holographic-unify:ci)"
           trap 'docker rm --force "$container" >/dev/null 2>&1 || true; rm -rf "$runtime_context"' EXIT
           python -I -B scripts/verify_space.py --url http://127.0.0.1:17860 --timeout 60
+          # The image's own HEALTHCHECK (/healthz) must report healthy, not just exist.
+          health=""
+          for _ in $(seq 1 60); do
+            health="$(docker inspect --format '{{.State.Health.Status}}' "$container")"
+            if [ "$health" = healthy ]; then break; fi
+            sleep 2
+          done
+          echo "container health: $health"
+          test "$health" = healthy
   grok-contract:
     name: grok-contract
     runs-on: ubuntu-24.04

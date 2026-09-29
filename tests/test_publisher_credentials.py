@@ -19,16 +19,16 @@ WORKFLOW=ROOT/'.github/workflows/deploy-hf-space.yml'
 
 
 class CredentialContracts(unittest.TestCase):
-    def test_only_established_aliases_reach_the_publication_step(self):
+    def test_exactly_one_secret_name_reaches_the_publication_step(self):
         workflow=WORKFLOW.read_text()
         before,after=workflow.split('      - name: Publish existing target and verify immutable provider and running bytes\n',1)
         step,remaining=after.split('      - name: Retain explicit pre-publisher failure\n',1)
         self.assertNotIn('secrets.',before)
         self.assertNotIn('secrets.',remaining)
-        expression='${{ secrets.HF_ORG_TOKEN || secrets.HF_ORG_TOKEN1 || secrets.HF_TOKEN || secrets.HF_WRITE_TOKEN }}'
-        self.assertIn('HF_TOKEN: '+expression,step)
-        self.assertEqual(re.findall(r'secrets\.([A-Z_0-9]+)',step),
-                         ['HF_ORG_TOKEN','HF_ORG_TOKEN1','HF_TOKEN','HF_WRITE_TOKEN'])
+        # One name and no alias chain (plan decision D5): a missing secret fails closed.
+        self.assertIn('HF_TOKEN: ${{ secrets.HF_ORG_TOKEN }}\n',step)
+        self.assertEqual(re.findall(r'secrets\.([A-Z_0-9]+)',workflow),['HF_ORG_TOKEN'])
+        self.assertNotIn('||',step)
         self.assertNotIn('github.token',step)
         self.assertNotIn('inputs.',step)
         self.assertNotIn('secrets: inherit',workflow)
@@ -42,9 +42,31 @@ class CredentialContracts(unittest.TestCase):
         self.assertIn('      - tests/test_*.py',workflow)
         self.assertNotIn('echo "$HF_TOKEN"',workflow)
 
+    def test_workflow_holds_the_per_asset_hub_lock(self):
+        workflow=WORKFLOW.read_text()
+        # Plan decision D3: one lock per Hub asset, never keyed by event or ref.
+        self.assertIn('concurrency:\n  group: hf-write/space/SZLHOLDINGS/holographic-unify\n'
+                      '  cancel-in-progress: false\n',workflow)
+        self.assertEqual(workflow.count('group:'),1)
+
+    def test_local_apply_is_refused_before_source_or_credential_use(self):
+        with tempfile.TemporaryDirectory() as d:
+            env={'RUNNER_TEMP':d,'HF_TOKEN':'synthetic-do-not-transmit'}
+            with patch.dict(os.environ,env,clear=True), patch.object(sys,'argv',['publisher','--apply']), \
+                 patch.object(p,'exact_main') as source, patch.object(p,'publication') as publish, \
+                 contextlib.redirect_stdout(io.StringIO()) as stdout:
+                code=p.main()
+            receipt=json.loads((Path(d)/'szl-holographic-receipt.json').read_text())
+        source.assert_not_called()
+        publish.assert_not_called()
+        self.assertEqual(code,1)
+        self.assertEqual(receipt['error_code'],'APPLY_REQUIRES_COMMITTED_WORKFLOW')
+        self.assertNotIn('source_revision',receipt)
+        self.assertNotIn('synthetic-do-not-transmit',json.dumps(receipt)+stdout.getvalue())
+
     def missing_run(self,extra):
         with tempfile.TemporaryDirectory() as d:
-            env={'RUNNER_TEMP':d,**extra}
+            env={'RUNNER_TEMP':d,'GITHUB_ACTIONS':'true',**extra}
             with patch.dict(os.environ,env,clear=True), patch.object(sys,'argv',['publisher','--apply']), \
                  patch.object(p,'exact_main',return_value='a'*40), \
                  patch.object(p,'payload',return_value={'index.html':b'fixture'}), \

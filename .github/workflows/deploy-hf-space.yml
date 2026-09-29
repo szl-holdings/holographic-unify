@@ -13,8 +13,9 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: read
+# One lock per Hub asset (plan decision D3), never keyed by event or ref.
 concurrency:
-  group: publish-holographic-unify-space
+  group: hf-write/space/SZLHOLDINGS/holographic-unify
   cancel-in-progress: false
 jobs:
   publish:
@@ -44,9 +45,11 @@ jobs:
         run: python -m pip install --disable-pip-version-check --no-cache-dir 'huggingface_hub==1.23.0'
       - name: Publish existing target and verify immutable provider and running bytes
         env:
-          # Same fixed aliases and precedence as .github/hf-org-card-autopublish.yml.
-          # Values remain within this step; no user-supplied or GitHub token fallback.
-          HF_TOKEN: ${{ secrets.HF_ORG_TOKEN || secrets.HF_ORG_TOKEN1 || secrets.HF_TOKEN || secrets.HF_WRITE_TOKEN }}
+          # One secret name: the one the last green publication resolved to (run
+          # 36513900089; it was first in the former four-alias chain, so the
+          # other three were never read). No alias fallback, no user-supplied
+          # or GitHub token. Values remain within this step.
+          HF_TOKEN: ${{ secrets.HF_ORG_TOKEN }}
         run: python -I -B scripts/publish_space.py --apply --timeout 1200
       - name: Verify live readiness and exact application source identity
         run: >-

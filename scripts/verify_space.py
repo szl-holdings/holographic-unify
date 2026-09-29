@@ -60,6 +60,17 @@ def verify_payload() -> None:
         for line in dockerfile.splitlines()
         if line.strip() and not line.lstrip().startswith("#")
     ]
+    base_images = [line for line in docker_instructions if line.startswith("from ")]
+    require(
+        len(base_images) == 1
+        and re.fullmatch(r"from \S+:[\w.-]+@sha256:[0-9a-f]{64}", base_images[0]) is not None,
+        "Hub Dockerfile base image must be pinned by tag and sha256 digest",
+    )
+    healthchecks = [line for line in docker_instructions if line.startswith("healthcheck ")]
+    require(
+        len(healthchecks) == 1 and "/healthz" in dockerfile.split("HEALTHCHECK", 1)[1].split("\nCMD", 1)[0],
+        "Hub Dockerfile must declare exactly one HEALTHCHECK on /healthz",
+    )
     require(
         not any("npm" in line for line in docker_instructions),
         "Hub Dockerfile must not invoke npm",

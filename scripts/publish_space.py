@@ -214,6 +214,11 @@ def main() -> int:
         write_receipt(receipt_path, receipt)
     try:
         require(0 < args.timeout <= 1200, "INVALID_TIMEOUT")
+        # One committed writer per Hub asset: provider writes run only inside
+        # .github/workflows/deploy-hf-space.yml (push to main or manual dispatch),
+        # never from a workstation. A local run without --apply stays a dry run.
+        require(not args.apply or os.getenv("GITHUB_ACTIONS") == "true",
+                "APPLY_REQUIRES_COMMITTED_WORKFLOW")
         source = exact_main()
         receipt["source_revision"] = source
         files = payload(source)

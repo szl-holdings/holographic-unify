@@ -35,8 +35,9 @@ Estate command hologram. **Wave 2026 admitted. PEFT on Forge. Gate on Serve.**
 
 GitHub is canonical source. Hugging Face is the artifact registry, not the front door.
 Hub RUNNING is claimed only after `scripts/publish_space.py --apply` returns
-provider metadata and a successful `/healthz` readback. The publisher uses the
-active local `hf` credential without printing or copying it into GitHub.
+provider metadata and a successful `/healthz` readback. It runs only inside the
+committed workflow `.github/workflows/deploy-hf-space.yml` (push to `main` or
+manual dispatch), which holds the one publisher secret; a local `--apply` is refused.
 **Do not `npm ci` on Hub.** Flatten payload is `space/` (stdlib HTTP, GCR Python).
 
 | Surface | State |
@@ -99,9 +100,11 @@ Hub is the Python flatten only.
 # Validate source and runtime contract without credentials.
 python3 -I -B scripts/verify_space.py
 
-# Preview the exact source-bound publication plan, then apply it explicitly.
+# Preview the exact source-bound publication plan (dry run, no provider calls).
 python3 -I -B scripts/publish_space.py
-python3 -I -B scripts/publish_space.py --apply
+
+# Publish: only the committed workflow may apply it.
+gh workflow run deploy-hf-space.yml -R szl-holdings/holographic-unify --ref main
 
 # Run the Hub flatten directly.
 python space/server.py

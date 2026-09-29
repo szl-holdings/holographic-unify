@@ -16,18 +16,25 @@ tags:
   - vllm
   - ayllu
   - szl-holdings
+szl:
+  source_repo: szl-holdings/holographic-unify
+  proof_url: https://github.com/szl-holdings/holographic-unify
 ---
 
 # SZL Holographic Unify — Hub flatten
 
-**GitHub is canonical.** This directory is the Hugging Face payload.
+**GitHub is canonical.** Source:
+[github.com/szl-holdings/holographic-unify](https://github.com/szl-holdings/holographic-unify).
+Its `space/` directory is this Space's payload.
 
 - Stdlib HTTP on 7860. No npm. No CUDA. No Unsloth.
 - GPU vLLM / Unsloth remain **ROADMAP**.
-- Energy joules **UNAVAILABLE** unless NVML MEASURED.
+- Energy joules are **UNAVAILABLE**. This Space takes no NVML reading.
 - Λ uniqueness is **Conjecture 1**. Never proven trust.
 - Kimi-K3 dump is **REFUSED**.
 
-`scripts/publish_space.py --apply` publishes this flatten from an exact, clean
-GitHub `main` checkout and waits for provider plus `/healthz` readback. Do not
-`npm ci` on Hub.
+The only writer is the committed workflow
+`.github/workflows/deploy-hf-space.yml` in the source repository. It runs
+`scripts/publish_space.py --apply` on the exact `main` commit (push or manual
+dispatch), then requires provider byte readback and a live `/healthz` before it
+records success. Do not `npm ci` on Hub.
