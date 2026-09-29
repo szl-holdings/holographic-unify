@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { MODELS, SPACES } from "./catalog.ts";
 
-// The catalog is served publicly and every non-null `github` value is rendered
-// as a github.com link. A link to a repository that is not public 404s for
-// visitors and discloses a non-public repository name, so each value must be a
-// repository that was verified public.
+// The catalog is served publicly and every non-null `github` value is shown to
+// visitors as the row's GitHub source (plain `owner/name` text in the command
+// center Spaces table and model cards, and matched by search). A value naming a
+// repository that is not public discloses that name and sends readers to a
+// repository that 404s for them, so each value must be a repository that was
+// verified public.
 //
 // This allowlist was built by checking every `github` value in catalog.ts with
 // `gh api repos/<owner>/<name> --jq .visibility` (a 404 counts as not public).
