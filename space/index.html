@@ -5,28 +5,30 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SZL Holographic Unify</title>
 <style>
-:root{--bg:#05070d;--void:#080c14;--panel:#0b121b;--line:#1b2734;--proof:#3af4c8;--gold:#e8c074;--cream:#eef3f6;--para:#9fb1bf;--dim:#6c7d8c;--false:#d76a6a}
+:root{--bg:#05070d;--void:#080c14;--panel:#0b121b;--line:#1b2734;--proof:#3af4c8;--gold:#e8c074;--cream:#eef3f6;--para:#9fb1bf;--dim:var(--para);--false:#d76a6a}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--cream);font:15px/1.5 ui-sans-serif,system-ui,sans-serif;min-height:100%}
 body{background:radial-gradient(120% 90% at 50% -10%,rgba(232,192,116,.09),transparent 60%),var(--bg)}
 main{max-width:880px;margin:0 auto;padding:28px 18px 64px}
-.eyebrow{font:10.5px ui-monospace,monospace;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold)}
+.eyebrow{font:14px/1.5 ui-monospace,monospace;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold)}
 h1{font-size:clamp(22px,4vw,34px);margin:.2em 0 .4em}
 .lede{color:var(--para);max-width:68ch}
 .badges{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 22px}
-.badge{font:10.5px ui-monospace,monospace;padding:3px 9px;border:1px solid var(--line);border-radius:6px;color:var(--para);background:#10171f}
+.badge{font:14px/1.5 ui-monospace,monospace;padding:3px 9px;border:1px solid var(--line);border-radius:6px;color:var(--para);background:#10171f}
 .badge b{color:var(--gold)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:18px 0}
 .card{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:14px}
-.card .k{font:10px ui-monospace,monospace;letter-spacing:.8px;text-transform:uppercase;color:var(--dim)}
+.card .k{font:14px/1.5 ui-monospace,monospace;letter-spacing:.8px;text-transform:uppercase;color:var(--dim)}
 .card .v{font:18px/1.2 ui-monospace,monospace;margin-top:6px;color:var(--gold)}
 .card p{margin:8px 0 0;color:var(--para);font-size:13px}
-table{width:100%;border-collapse:collapse;font:12.5px/1.45 ui-monospace,monospace}
-th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+table{width:100%;table-layout:fixed;border-collapse:collapse;font:14px/1.5 ui-monospace,monospace}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 th{color:var(--dim);font-weight:500}
 .ok{color:var(--proof)} .hold{color:var(--gold)} .down{color:var(--false)}
 a{color:var(--proof)}
-.foot{margin-top:28px;border-top:1px solid var(--line);padding-top:14px;color:var(--dim);font:11px ui-monospace,monospace}
+a:focus-visible{outline:2px solid var(--proof);outline-offset:3px;border-radius:3px}
+.foot{margin-top:28px;border-top:1px solid var(--line);padding-top:14px;color:var(--dim);font:14px/1.5 ui-monospace,monospace}
+.foot a{display:inline-flex;align-items:center;min-height:44px;min-width:44px;max-width:100%;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
