@@ -17,7 +17,7 @@ if not 1 <= PORT <= 65535:
     raise ValueError("PORT must be between 1 and 65535")
 SOURCE = "szl-holdings/holographic-unify"
 TARGET = "SZLHOLDINGS/holographic-unify"
-PAYLOAD_FILES = {"Dockerfile", "README.md", "index.html", "server.py"}
+PAYLOAD_FILES = {"Dockerfile", "README.md", "index.html", "server.py", "szl-space-hologram.css", "szl-space-hologram.js"}
 HONESTY = {
     "surface": "SZL Holographic Unify", "github": SOURCE,
     "canonical_space": TARGET, "kind": "HOLOGRAM", "flagship": False,
