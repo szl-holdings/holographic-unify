@@ -19,7 +19,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SPACE = ROOT / "space"
-PAYLOAD_FILES = {"Dockerfile", "README.md", "index.html", "server.py"}
+PAYLOAD_FILES = {"Dockerfile", "README.md", "index.html", "server.py", "szl-space-hologram.css", "szl-space-hologram.js"}
 EXPECTED_HONESTY: dict[str, Any] = {
     "surface": "SZL Holographic Unify",
     "github": "szl-holdings/holographic-unify",
