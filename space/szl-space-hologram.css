@@ -1,0 +1,511 @@
+/*
+ * SZL Holographic Space Fabric v2
+ * Shared accessibility and navigation mechanics; deterministic visual identity
+ * per Space. Original local-only implementation. SPDX-License-Identifier: Apache-2.0
+ */
+:root {
+  /* Default palette = SZL KANCHAY v1.1.0, founder direction (szl-brand kanchay/ @aa876fa;
+     szl-design-system.css, loaded before this layer). Same mapping as the .github fabric:
+     ground --bg, surface --surface, text --text / --text-sub, functional accent --link
+     (teal: kicker, skip link, native controls), linework color-silver-300, focus --focus.
+     Lines, fields, glows and dot fields are silver. No coral: the fabric has no single node
+     element. Motifs (geometry) carry each Space's identity. */
+  --szl-space-bg: var(--bg);
+  --szl-space-surface: var(--surface);
+  --szl-space-fg: var(--text);
+  --szl-space-muted: var(--text-sub);
+  --szl-space-accent: var(--link);
+  --szl-space-accent-2: var(--color-silver-300);
+  --szl-space-focus: var(--focus);
+  --szl-space-x: 52vw;
+  --szl-space-y: 30vh;
+  --szl-space-nx: 0;
+  --szl-space-ny: 0;
+  --szl-space-line: color-mix(in srgb, var(--szl-space-accent-2) 17%, transparent);
+  --szl-space-glow: color-mix(in srgb, var(--szl-space-accent-2) 16%, transparent);
+  --szl-space-glow-2: color-mix(in srgb, var(--szl-space-accent-2) 14%, transparent);
+  color-scheme: dark;
+}
+
+html[data-szl-space-holo-v2="true"] {
+  min-height: 100%;
+  background: var(--szl-space-bg);
+  accent-color: var(--szl-space-accent);
+  scroll-behavior: smooth;
+}
+html[data-szl-space-holo-v2="true"] body { min-height: 100%; isolation: isolate; }
+
+#szl-space-holo-v2-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  opacity: .7;
+  mix-blend-mode: screen;
+}
+#szl-space-holo-v2-ambient > span {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.szl-space-field {
+  inset: -24%;
+  background-image:
+    linear-gradient(var(--szl-space-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--szl-space-line) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at var(--szl-space-x) var(--szl-space-y), currentColor 0 13%, transparent 64%);
+  transform: perspective(760px) rotateX(63deg) translate3d(calc(var(--szl-space-nx) * -12px), calc(34% + var(--szl-space-ny) * -8px), -90px);
+  opacity: .68;
+}
+.szl-space-orbit {
+  top: calc(var(--szl-space-y) - min(31vw, 300px));
+  left: calc(var(--szl-space-x) - min(31vw, 300px));
+  width: min(62vw, 600px);
+  aspect-ratio: 1;
+  border: 1px solid var(--szl-space-line);
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, transparent 0 56px, var(--szl-space-line) 57px 58px),
+    conic-gradient(from 215deg, transparent 0 77%, var(--szl-space-glow) 79% 82%, transparent 85%);
+  box-shadow: inset 0 0 70px var(--szl-space-glow), 0 0 85px var(--szl-space-glow-2);
+  transform: translate3d(calc(var(--szl-space-nx) * 18px), calc(var(--szl-space-ny) * 14px), 0);
+  opacity: .5;
+  animation: szl-space-orbit 44s linear infinite;
+}
+.szl-space-beam {
+  top: -22%;
+  left: calc(var(--szl-space-x) - 17vw);
+  width: 34vw;
+  height: 150%;
+  background: linear-gradient(90deg, transparent, var(--szl-space-glow), var(--szl-space-glow-2), transparent);
+  filter: blur(30px);
+  transform: translateX(calc(var(--szl-space-nx) * 26px)) rotate(12deg);
+  opacity: .42;
+}
+.szl-space-scan {
+  inset: 0;
+  background: repeating-linear-gradient(180deg, transparent 0 6px, color-mix(in srgb, var(--szl-space-fg) 2%, transparent) 7px 8px);
+  mask-image: linear-gradient(transparent 0 8%, currentColor 22% 82%, transparent 96%);
+  opacity: .22;
+  animation: szl-space-scan 15s linear infinite;
+}
+.szl-space-nodes {
+  inset: 0;
+  background-image: radial-gradient(circle, var(--szl-space-accent-2) 0 1.5px, transparent 2.5px);
+  background-size: 118px 78px;
+  mask-image: radial-gradient(ellipse at 66% 38%, currentColor, transparent 65%);
+  opacity: .18;
+}
+
+/* Curated motifs: each family changes geometry, not merely color. */
+html[data-szl-space-motif="command-grid"] .szl-space-field { background-size: 48px 48px; }
+html[data-szl-space-motif="signal-aurora"] .szl-space-field { background: conic-gradient(from 75deg, transparent, var(--szl-space-glow), transparent 28%, var(--szl-space-glow-2), transparent 64%); filter: blur(35px); transform: scale(1.25); animation: szl-space-aurora 24s ease-in-out infinite alternate; }
+html[data-szl-space-motif="signal-aurora"] .szl-space-nodes { background-size: 72px 44px; opacity: .24; }
+html[data-szl-space-motif="bathymetric-radar"] .szl-space-orbit { width: min(76vw, 760px); background: repeating-radial-gradient(circle, transparent 0 48px, var(--szl-space-line) 49px 50px), conic-gradient(from 0deg, var(--szl-space-glow), transparent 11% 89%, var(--szl-space-glow)); animation-duration: 19s; }
+html[data-szl-space-motif="bathymetric-radar"] .szl-space-field { background: repeating-radial-gradient(ellipse at 22% 78%, transparent 0 30px, var(--szl-space-line) 31px 32px); transform: rotate(-8deg) scale(1.28); }
+html[data-szl-space-motif="parcel-topography"] .szl-space-field { background: repeating-radial-gradient(ellipse at 20% 56%, transparent 0 34px, var(--szl-space-line) 35px 36px), repeating-radial-gradient(ellipse at 82% 34%, transparent 0 51px, var(--szl-space-glow-2) 52px 53px); transform: rotate(-7deg) scale(1.18); }
+html[data-szl-space-motif="threat-lattice"] .szl-space-field { background: linear-gradient(31deg, transparent 48%, var(--szl-space-line) 49% 50%, transparent 51%), linear-gradient(149deg, transparent 48%, var(--szl-space-glow-2) 49% 50%, transparent 51%); background-size: 82px 82px; transform: skewX(-7deg) scale(1.12); }
+html[data-szl-space-motif="threat-lattice"] .szl-space-orbit { border-radius: 0; clip-path: polygon(50% 0, 94% 25%, 94% 75%, 50% 100%, 6% 75%, 6% 25%); }
+html[data-szl-space-motif="case-lines"] .szl-space-field { background: repeating-linear-gradient(0deg, transparent 0 51px, var(--szl-space-line) 52px 53px), repeating-linear-gradient(90deg, transparent 0 219px, var(--szl-space-glow-2) 220px 221px); transform: rotate(-2deg); }
+html[data-szl-space-motif="editorial-orbit"] .szl-space-orbit { transform: rotate(12deg) scaleY(.54); width: min(76vw, 760px); }
+html[data-szl-space-motif="editorial-orbit"] .szl-space-field { background: linear-gradient(115deg, transparent 37%, var(--szl-space-line) 38% 40%, transparent 41% 61%, var(--szl-space-glow-2) 62% 64%, transparent 65%); transform: none; }
+html[data-szl-space-motif="graph-mesh"] .szl-space-field { background: radial-gradient(circle, var(--szl-space-accent-2) 0 2px, transparent 3px), linear-gradient(30deg, transparent 49%, var(--szl-space-line) 50%, transparent 51%), linear-gradient(150deg, transparent 49%, var(--szl-space-line) 50%, transparent 51%); background-size: 94px 94px; transform: none; }
+html[data-szl-space-motif="build-circuit"] .szl-space-field { background: radial-gradient(circle, var(--szl-space-accent-2) 0 2px, transparent 3px), linear-gradient(90deg, var(--szl-space-line) 1px, transparent 1px), linear-gradient(var(--szl-space-line) 1px, transparent 1px); background-size: 70px 70px; clip-path: polygon(0 8%, 76% 8%, 76% 28%, 100% 28%, 100% 92%, 22% 92%, 22% 69%, 0 69%); transform: none; }
+html[data-szl-space-motif="recursive-weave"] .szl-space-field { background: repeating-conic-gradient(from 0deg, var(--szl-space-line) 0 1deg, transparent 1deg 13deg); mask-image: repeating-radial-gradient(circle, currentColor 0 1px, transparent 2px 54px); transform: scale(1.18); animation: szl-space-ring 46s linear infinite; }
+html[data-szl-space-motif="agent-swarm"] .szl-space-field { background-image: radial-gradient(circle, var(--szl-space-accent-2) 0 2px, transparent 3px), radial-gradient(circle, var(--szl-space-muted) 0 1px, transparent 2px); background-position: 0 0, 31px 27px; background-size: 72px 68px, 89px 83px; transform: none; animation: szl-space-swarm 26s ease-in-out infinite alternate; }
+html[data-szl-space-motif="cell-membrane"] .szl-space-field { background: repeating-radial-gradient(ellipse at 48% 46%, transparent 0 42px, var(--szl-space-line) 43px 44px); transform: rotate(16deg) scale(1.24); }
+html[data-szl-space-motif="checksum-ledger"] .szl-space-field { background: repeating-linear-gradient(0deg, transparent 0 31px, var(--szl-space-line) 32px 33px), repeating-linear-gradient(90deg, transparent 0 167px, var(--szl-space-glow-2) 168px 169px); transform: none; }
+
+/* Shared shell uses Shadow DOM, so this only styles ambient and opt-in primitives. */
+.szl-space-panel {
+  border: 1px solid var(--szl-space-line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--szl-space-surface) 86%, transparent);
+  box-shadow: 0 22px 74px color-mix(in srgb, var(--szl-space-bg) 34%, transparent), inset 0 1px 0 color-mix(in srgb, var(--szl-space-fg) 6%, transparent);
+  backdrop-filter: blur(16px) saturate(125%);
+}
+.szl-space-kicker { color: var(--szl-space-accent); font-size: .72rem; font-weight: 760; letter-spacing: .18em; text-transform: uppercase; }
+.szl-space-gradient-text { color: var(--szl-space-fg); background: linear-gradient(110deg, var(--szl-space-fg), var(--szl-space-fg) 58%, var(--szl-space-muted)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.szl-space-skip-link { position: fixed; top: 8px; left: 8px; z-index: 2147483647; padding: 10px 14px; border: 2px solid var(--szl-space-accent); border-radius: 9px; color: var(--szl-space-bg); background: var(--szl-space-accent); font: 700 14px/1.2 var(--font-body); text-decoration: none; transform: translateY(-160%); transition: transform .15s ease; }
+.szl-space-skip-link:focus { transform: translateY(0); }
+html[data-szl-space-holo-v2="true"] :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible { outline: 3px solid var(--szl-space-focus) !important; outline-offset: 4px !important; }
+html[data-szl-space-power="low"] .szl-space-scan, html[data-szl-space-power="low"] .szl-space-beam { display: none; }
+html[data-szl-space-power="low"] .szl-space-orbit { animation: none; opacity: .28; }
+html[data-szl-space-state="paused"] #szl-space-holo-v2-ambient > span { animation-play-state: paused !important; }
+
+@keyframes szl-space-orbit { to { rotate: 360deg; } }
+@keyframes szl-space-scan { from { transform: translateY(-7%); } to { transform: translateY(7%); } }
+@keyframes szl-space-aurora { from { transform: translate3d(-4%, -3%, 0) rotate(-7deg) scale(1.18); } to { transform: translate3d(6%, 5%, 0) rotate(10deg) scale(1.28); } }
+@keyframes szl-space-ring { to { rotate: -360deg; } }
+@keyframes szl-space-swarm { from { transform: translate3d(-1.5%, -1%, 0); } to { transform: translate3d(1.5%, 1%, 0) scale(1.04); } }
+
+@media (max-width: 700px) {
+  #szl-space-holo-v2-ambient { opacity: .5; }
+  .szl-space-field { background-size: 43px 43px; }
+  .szl-space-orbit { width: 96vw; left: 18vw; top: 7vh; }
+}
+@media (hover: none), (pointer: coarse) {
+  .szl-space-field, .szl-space-orbit, .szl-space-beam { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-szl-space-holo-v2="true"] { scroll-behavior: auto; }
+  #szl-space-holo-v2-ambient > span, .szl-space-skip-link { animation: none !important; transition: none !important; transform: none !important; }
+  .szl-space-scan { display: none; }
+}
+@media (prefers-contrast: more) {
+  #szl-space-holo-v2-ambient { opacity: .28; }
+  .szl-space-panel { border-width: 2px; background: var(--szl-space-surface); backdrop-filter: none; }
+}
+@media (forced-colors: active) {
+  #szl-space-holo-v2-ambient { display: none !important; }
+  .szl-space-panel { border: 1px solid CanvasText; background: Canvas; box-shadow: none; }
+  .szl-space-gradient-text { color: CanvasText; background: none; -webkit-text-fill-color: currentColor; }
+}
+@media print {
+  szl-space-ecosystem-bar, #szl-space-holo-v2-ambient, .szl-space-skip-link { display: none !important; }
+  html[data-szl-space-holo-v2="true"], html[data-szl-space-holo-v2="true"] body { color: var(--color-gray-900) !important; background: var(--color-white) !important; }
+}
+
+/*
+ * SZL Public Experience v3.1
+ * Responsive, zoom-safe, theatre-scale adaptation for every Holographic Space.
+ * Additive only: product-owned layout and information architecture remain authoritative.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+:root {
+  --szl-public-experience-version: 3.1;
+  --szl-touch-target: 44px;
+  --szl-touch-target-coarse: 48px;
+  --szl-readable-measure: 72ch;
+  --szl-viewport-height: 100vh;
+  --szl-effective-inline-size: 100vw;
+  --szl-theatre-gutter: clamp(16px, 3vw, 72px);
+  --szl-fluid-gap: clamp(10px, 1.5vw, 24px);
+  --szl-fluid-radius: clamp(12px, 1vw, 20px);
+}
+
+@supports (height: 100dvh) {
+  :root { --szl-viewport-height: 100dvh; }
+}
+
+html[data-szl-space-holo-v2="true"] {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+}
+
+html[data-szl-space-holo-v2="true"] body {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: var(--szl-viewport-height);
+  overflow-x: clip;
+  overflow-wrap: break-word;
+}
+
+html[data-szl-space-holo-v2="true"] :where(
+  main, header, footer, nav, section, article, aside,
+  form, fieldset, figure, div, ul, ol, li,
+  #root, .app, .main, .container, .wrapper,
+  .gradio-container, [data-testid="stApp"], [data-testid="stAppViewContainer"],
+  [data-testid="stMain"], [data-testid="stMainBlockContainer"]
+) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+html[data-szl-space-holo-v2="true"] :where(
+  h1, h2, h3, h4, h5, h6, p, li, dd, dt,
+  a, button, label, legend, figcaption, blockquote
+) {
+  overflow-wrap: anywhere;
+}
+
+html[data-szl-space-holo-v2="true"] :where(h1, h2, h3) {
+  text-wrap: balance;
+}
+
+html[data-szl-space-holo-v2="true"] :where(p, li, dd, figcaption, blockquote) {
+  text-wrap: pretty;
+}
+
+html[data-szl-space-holo-v2="true"] :where(img, svg, video, picture) {
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+html[data-szl-space-holo-v2="true"] :where(canvas, iframe, object, embed) {
+  max-inline-size: 100%;
+}
+
+html[data-szl-space-holo-v2="true"] iframe {
+  inline-size: 100%;
+  border: 0;
+}
+
+html[data-szl-space-holo-v2="true"] :where(input, textarea, select, button) {
+  max-inline-size: 100%;
+}
+
+html[data-szl-space-holo-v2="true"] :where(pre, [data-code-block], .code-block) {
+  max-inline-size: 100%;
+  overflow: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+html[data-szl-space-holo-v2="true"] pre code {
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: pre;
+}
+
+html[data-szl-space-holo-v2="true"] table {
+  max-inline-size: 100%;
+}
+
+html[data-szl-space-holo-v2="true"] :where(dialog, [role="dialog"], [aria-modal="true"]) {
+  max-inline-size: min(92vw, 920px);
+  max-block-size: min(92vh, 92dvh);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+html[data-szl-space-holo-v2="true"] :where(.szl-space-panel, [data-szl-panel]) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  border-radius: var(--szl-fluid-radius);
+}
+
+/* Shared navigation remains source-visible, compact, and nonblocking. */
+szl-space-ecosystem-bar {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  position: relative;
+  z-index: 2147483000;
+}
+
+/* CSS zoom used by browser audits can otherwise leave fixed chrome at four times
+   the visual viewport. The runtime controller records the effective layout width. */
+html[data-szl-space-holo-v2="true"][data-szl-zoom-tier="high"] body,
+html[data-szl-space-holo-v2="true"][data-szl-zoom-tier="extreme"] body {
+  inline-size: var(--szl-effective-inline-size);
+  max-inline-size: var(--szl-effective-inline-size);
+}
+
+html[data-szl-space-holo-v2="true"][data-szl-zoom-tier="high"] :where(
+  .szl-flow-rail, .szl-holo-rail, [data-szl-floating-chrome]
+),
+html[data-szl-space-holo-v2="true"][data-szl-zoom-tier="extreme"] :where(
+  .szl-flow-rail, .szl-holo-rail, [data-szl-floating-chrome]
+) {
+  position: relative !important;
+  inset: auto !important;
+  inline-size: auto !important;
+  max-inline-size: 100% !important;
+  margin: 8px !important;
+  transform: none !important;
+}
+
+/* Phone: one readable column, compact ambience, no hidden horizontal content. */
+@media (max-width: 479px) {
+  :root {
+    --szl-theatre-gutter: max(12px, env(safe-area-inset-left, 0px));
+    --szl-fluid-gap: 10px;
+  }
+
+  html[data-szl-space-holo-v2="true"] body {
+    font-size: max(15px, 1rem);
+  }
+
+  html[data-szl-space-holo-v2="true"] :where(input, textarea, select) {
+    font-size: max(16px, 1em);
+  }
+
+  html[data-szl-space-holo-v2="true"] :where(table) {
+    display: block;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html[data-szl-space-holo-v2="true"] :where(
+    [data-szl-responsive-grid], .grid, [class*="grid-cols"]
+  ) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #szl-space-holo-v2-ambient {
+    opacity: .34;
+  }
+
+  #szl-space-holo-v2-ambient .szl-space-scan,
+  #szl-space-holo-v2-ambient .szl-space-beam {
+    display: none;
+  }
+
+  .szl-space-orbit {
+    inline-size: min(118vw, 560px);
+    inset-inline-start: 18vw;
+  }
+}
+
+/* Large phones and compact landscape. */
+@media (min-width: 480px) and (max-width: 767px) {
+  html[data-szl-space-holo-v2="true"] :where(table) {
+    display: block;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  #szl-space-holo-v2-ambient { opacity: .44; }
+}
+
+/* Tablet: preserve product structure while preventing cramped split panes. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --szl-theatre-gutter: clamp(20px, 3vw, 36px);
+    --szl-fluid-gap: clamp(12px, 2vw, 20px);
+  }
+
+  html[data-szl-space-holo-v2="true"] :where([data-szl-responsive-grid]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Desktop: full product density, bounded reading lines. */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  :root { --szl-theatre-gutter: clamp(24px, 3vw, 48px); }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --szl-theatre-gutter: clamp(36px, 4vw, 80px);
+    --szl-fluid-gap: clamp(16px, 1.25vw, 28px);
+  }
+
+  #szl-space-holo-v2-ambient { opacity: .74; }
+}
+
+/* Theatre and ultrawide: increase spatial field, not text-line length. */
+@media (min-width: 1920px) {
+  :root {
+    --szl-theatre-gutter: clamp(56px, 5vw, 128px);
+    --szl-fluid-gap: clamp(20px, 1.35vw, 36px);
+    --szl-fluid-radius: 20px;
+  }
+
+  html[data-szl-space-holo-v2="true"] :where(
+    p, li, dd, blockquote, figcaption
+  ) {
+    max-inline-size: var(--szl-readable-measure);
+  }
+
+  #szl-space-holo-v2-ambient {
+    opacity: .82;
+    transform: scale(1.035);
+    transform-origin: center;
+  }
+
+  .szl-space-orbit {
+    inline-size: min(54vw, 1040px);
+  }
+}
+
+@media (min-width: 2560px) {
+  :root {
+    --szl-theatre-gutter: clamp(88px, 6vw, 180px);
+    --szl-fluid-gap: 36px;
+  }
+
+  #szl-space-holo-v2-ambient {
+    transform: scale(1.08);
+  }
+}
+
+/* Coarse pointers and touch must not depend on hover or tiny hit areas. */
+@media (hover: none), (pointer: coarse) {
+  html[data-szl-space-holo-v2="true"] :where(
+    a[href], button, input:not([type="hidden"]), select, textarea,
+    summary, [role="button"], [tabindex]:not([tabindex="-1"])
+  ) {
+    min-block-size: var(--szl-touch-target-coarse);
+    touch-action: manipulation;
+  }
+
+  html[data-szl-space-holo-v2="true"] :where(
+    button, input[type="button"], input[type="submit"], input[type="reset"],
+    summary, [role="button"]
+  ) {
+    min-inline-size: var(--szl-touch-target-coarse);
+  }
+}
+
+/* Zoom/reflow support: no fixed-width content island may force the page wider. */
+@media (max-width: 640px) {
+  html[data-szl-space-holo-v2="true"] :where(
+    [style*="width:"], [style*="min-width:"]
+  ) {
+    max-inline-size: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-szl-space-holo-v2="true"] {
+    scroll-behavior: auto;
+  }
+
+  html[data-szl-space-holo-v2="true"] *,
+  html[data-szl-space-holo-v2="true"] *::before,
+  html[data-szl-space-holo-v2="true"] *::after {
+    scroll-behavior: auto !important;
+  }
+
+  #szl-space-holo-v2-ambient {
+    opacity: .22;
+  }
+}
+
+@media (prefers-contrast: more) {
+  html[data-szl-space-holo-v2="true"] {
+    --szl-space-line: color-mix(in srgb, var(--color-silver-100) 56%, transparent);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-szl-space-holo-v2="true"] {
+    scrollbar-color: CanvasText Canvas;
+  }
+
+  html[data-szl-space-holo-v2="true"] :where(
+    a, button, input, textarea, select, summary
+  ) {
+    forced-color-adjust: auto;
+  }
+}
+
+@media print {
+  html[data-szl-space-holo-v2="true"] {
+    overflow: visible;
+  }
+
+  html[data-szl-space-holo-v2="true"] body {
+    min-block-size: auto;
+    overflow: visible;
+  }
+
+  html[data-szl-space-holo-v2="true"] :where(pre, table) {
+    overflow: visible;
+    white-space: pre-wrap;
+  }
+}
