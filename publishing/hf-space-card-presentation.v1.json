@@ -1,0 +1,46 @@
+{
+  "_notice": "SPDX-License-Identifier: Apache-2.0; (c) 2026 SZL Holdings",
+  "schema": "szl.hf.space-card-presentation.v1",
+  "source_repository": "szl-holdings/holographic-unify",
+  "cards": [
+    {
+      "kind": "spaces",
+      "repo_id": "SZLHOLDINGS/holographic-unify",
+      "source_repository": "szl-holdings/holographic-unify",
+      "source_revision_before_presentation": "eb96e9c06f9ec7597049c51e1524cc17b19906ff",
+      "source_path": "space/README.md",
+      "source_url": "https://github.com/szl-holdings/holographic-unify/blob/eb96e9c06f9ec7597049c51e1524cc17b19906ff/space/README.md",
+      "presentation": {
+        "title": "SZL Holographic Unify",
+        "summary": "An estate command interface connecting the SZL Forge and Serve surfaces. This Space runs a small CPU web runtime and exposes source and honesty information.",
+        "artifact_type": "Estate command interface",
+        "stage": "CPU interface; GPU features remain roadmap",
+        "build_url": "https://github.com/szl-holdings/holographic-unify",
+        "evidence_url": "https://github.com/szl-holdings/holographic-unify/actions/workflows/deploy-hf-space.yml",
+        "visible_limits": [
+          "GPU vLLM serving and Unsloth training remain ROADMAP in this Space.",
+          "Energy joules are UNAVAILABLE without an actual measurement; this surface does not supply NVML measurements.",
+          "Lambda uniqueness remains Conjecture 1. Runtime readiness does not establish model quality or execution authority."
+        ]
+      },
+      "before_sha256": "6ec8dd9f9dde33781f81903f352828bcdc2ca4b943b133e3fad291183275b1da",
+      "after_sha256": "2319a67d4be51ee557f521eb6518f228de01fdf57b5833e332e44945fb6aed9b",
+      "front_matter_sha256": "6af85050df38fa44c1daea7f6abedf79928879a6da3e9a1d1fdcf14c4e406eac",
+      "preserved_body_sha256": "5fea6c58c1f827ff175a4587db38dcaa053b56006ad5ea169d7aa6285e3d898f",
+      "bytes_before": 1233,
+      "bytes_after": 2647,
+      "front_matter_preserved": true,
+      "original_body_preserved": true,
+      "publisher_repository": "szl-holdings/holographic-unify",
+      "publisher_workflow": ".github/workflows/deploy-hf-space.yml",
+      "publisher_workflow_source_url": "https://github.com/szl-holdings/holographic-unify/blob/eb96e9c06f9ec7597049c51e1524cc17b19906ff/.github/workflows/deploy-hf-space.yml",
+      "publisher_readme_mapping": "scripts/publish_space.py::PAYLOAD_FILES and payload() include space/README.md as README.md among the six exact Space source files, plus generated deployment.json.",
+      "publication_trigger": "Existing main push filtered to space/** and the declared publisher/test/workflow paths, or the existing workflow_dispatch event; exact-current-main guards remain unchanged.",
+      "publication_state_at_preparation": "SOURCE_CANDIDATE_ONLY_NO_HUB_EVENT_BY_THIS_LANE",
+      "publication_boundary": "The existing writer validates the fixed existing Docker target, captures its parent revision, uses parent_commit, preserves provider metadata, and requires immutable file-byte and live source readback. Runtime readiness is not model-quality or execution-authority evidence. No publisher invocation or provider change is performed by this source-only preparation.",
+      "writer_or_workflow_changed": false,
+      "runtime_or_artifact_code_changed": false,
+      "central_apply_allowed": false
+    }
+  ]
+}
