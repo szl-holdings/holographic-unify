@@ -6,7 +6,7 @@
 # for that tag on 2026-09-29 (3.14.7-slim-trixie; includes linux/amd64).
 # Dependabot (docker, /space) refreshes the digest only; a Python minor move
 # is a contract change made together with scripts/verify_space.py.
-FROM mirror.gcr.io/library/python:3.14-slim@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
+FROM mirror.gcr.io/library/python:3.14-slim@sha256:c3e521df8b2b498a7a682e7e18676771cb80c6b75b8699af886b2d554ce40151
 WORKDIR /app
 ENV HOST=0.0.0.0 PORT=7860 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 COPY . .
