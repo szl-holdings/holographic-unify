@@ -21,7 +21,7 @@ szl:
   proof_url: https://github.com/szl-holdings/holographic-unify
 ---
 
-<p><a href="https://huggingface.co/spaces/SZLHOLDINGS/szl-command-lab"><img src="https://raw.githubusercontent.com/szl-holdings/.github/main/profile/assets/szl/logos/szl_mark_holographic.svg" alt="SZL Holdings" width="112" /></a></p>
+<p><a href="https://huggingface.co/spaces/SZLHOLDINGS/szl-command-lab"><img src="./szl-icon-32.svg" alt="SZL Holdings" width="40" height="40" /></a></p>
 
 # SZL Holographic Unify
 

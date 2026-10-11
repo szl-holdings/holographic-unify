@@ -25,7 +25,12 @@ SPACE = ROOT / "space"
 SOURCE_REPOSITORY = "szl-holdings/holographic-unify"
 SPACE_ID = "SZLHOLDINGS/holographic-unify"
 ORIGIN = "https://szlholdings-holographic-unify.hf.space"
-PAYLOAD_FILES = frozenset({"Dockerfile", "README.md", "index.html", "server.py", "szl-space-hologram.css", "szl-space-hologram.js"})
+PAYLOAD_FILES = frozenset({
+    "Dockerfile", "README.md", "index.html", "server.py",
+    "szl-space-hologram.css", "szl-space-hologram.js", "unify.css", "unify.js",
+    "szl-tokens.css", "szl-icon-32.svg", "favicon.svg", "apple-touch-icon.png",
+    "szl-source.json", "szl-projection.json",
+})
 SHA40 = re.compile(r"[0-9a-f]{40}")
 MAX_BYTES = 8 * 1024 * 1024
 

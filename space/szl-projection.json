@@ -1,0 +1,52 @@
+{
+  "schema": "szl.native-frontend-projection.v1",
+  "repository": "https://github.com/szl-holdings/szl-brand",
+  "consumer": "https://github.com/szl-holdings/holographic-unify",
+  "bundle_revision": "4309f6fce89179331b0b3ed8c99494e76c5be256",
+  "qualified_token_source_revision": "27d12e77fc0f9f1a0e5fae8b34adf2380d51d070",
+  "projection": "Token subset and exact native Orbit exports in the flat Space payload",
+  "assets": [
+    {
+      "source_revision": "4309f6fce89179331b0b3ed8c99494e76c5be256",
+      "source_path": "kanchay/szl-tokens.css",
+      "installed_path": "szl-tokens.css",
+      "sha256": "81f7c9baeef0b435e6e3f9d0c4e0d70e40fa17df5d1f30697f623cd3ef5f8eab",
+      "bytes": 9559
+    },
+    {
+      "source_revision": "4309f6fce89179331b0b3ed8c99494e76c5be256",
+      "source_path": "kanchay/SOURCE.json",
+      "installed_path": "szl-source.json",
+      "sha256": "967a77235227f1d75852fb61873e46336e67403cbc0e7e12b141e31c83fbd93d",
+      "bytes": 1695
+    },
+    {
+      "source_revision": "fd62fe5856ed8e5f660eaae5a9c52957cd71b0a7",
+      "source_path": "kit/logos/orbit-v2/suite/szl-icon-32.svg",
+      "installed_path": "szl-icon-32.svg",
+      "sha256": "6e2b7d72a3af3d9602b79de41df0194ede6496a9661f057108ec224c0efc92e6",
+      "bytes": 2969
+    },
+    {
+      "source_revision": "fd62fe5856ed8e5f660eaae5a9c52957cd71b0a7",
+      "source_path": "kit/logos/orbit-v2/suite/szl-icon-16.svg",
+      "installed_path": "favicon.svg",
+      "sha256": "6e2dc7c9794dc452fbccb44ffadbd168c2584361904e8bcaeba542427d9e1a3a",
+      "bytes": 1627
+    },
+    {
+      "source_revision": "fd62fe5856ed8e5f660eaae5a9c52957cd71b0a7",
+      "source_path": "kit/logos/orbit-v2/suite/png/apple-touch-icon-180.png",
+      "installed_path": "apple-touch-icon.png",
+      "sha256": "ddeb873e960f14c41078d82cad4f7bb5a40dca555867ac3c3fb869ce46bbef6c",
+      "bytes": 5913
+    }
+  ],
+  "attribution": {
+    "creator": "SZL Holdings",
+    "orcid": "0009-0001-0110-4173",
+    "art_license": "CC-BY-4.0",
+    "code_license": "Apache-2.0"
+  },
+  "qualification": "Byte identity only. Unsigned projection metadata; not a runtime, publisher or cryptographic product receipt. szl-source.json is the unchanged upstream full-bundle SOURCE.json; only the assets listed here are installed."
+}
