@@ -1,0 +1,20 @@
+{
+  "schema": "szl.surface-foundry/v3",
+  "surfaces": [
+    {
+      "slug": "holographic-unify",
+      "display_name": "Holographic Unify",
+      "kind": "repo",
+      "one_liner": "Inspect the estate command hologram, PEFT composition blueprints and declared serve gates.",
+      "decision_path": "Understand the hologram's purpose and the boundary between a blueprint and a trained artifact.",
+      "builder_path": "Start with canonical GitHub source and the separately owned Space package.",
+      "primary_url": "https://github.com/szl-holdings/holographic-unify",
+      "source_url": "https://github.com/szl-holdings/holographic-unify",
+      "evidence_url": "https://github.com/szl-holdings/holographic-unify/blob/cf3925ab1c9b78fccf5780d2098eea0864afb33b/README.md",
+      "evidence_label": "REPORTED",
+      "operational_state": "UNKNOWN",
+      "limitations": "Source presentation; current Hub runtime requires publisher readback. PEFT composition is not training. Signatures remain UNSIGNED-honest, energy UNAVAILABLE and Λ Conjecture 1.",
+      "image_url": "./readme-surface-card.svg"
+    }
+  ]
+}

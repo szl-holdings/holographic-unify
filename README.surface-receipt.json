@@ -1,0 +1,11 @@
+{
+  "contract_sha256": "383c16e7ac6b8c97773851002c3c12fbb3184a7be42f3888cd99d3b5cd4cb6e8",
+  "evidence_label": "REPORTED",
+  "kind": "repo",
+  "operational_state": "UNKNOWN",
+  "readme_block_sha256": "e82d9f586ecc5a2c18dae1cf33ad72b71daaf516b24beee05a6f04c0b272d180",
+  "schema": "szl.surface-receipt/v1",
+  "surface": "holographic-unify",
+  "svg_sha256": "e47f0c750712575a39c43a96730c6cfb6a9bed01841fbc676a9cd72b4a1731e7",
+  "visual_variant": 0
+}
