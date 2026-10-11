@@ -76,7 +76,7 @@ class RuntimeHttpTests(unittest.TestCase):
         self.assertIs(json.loads(body)['ready'],True)
 
     def test_every_fixed_static_route_serves_the_published_bytes_and_mime(self):
-        self.assertTrue({name for name, _ in s.STATIC_FILES.values()} <= p.PAYLOAD_FILES)
+        self.assertLessEqual({name for name, _ in s.STATIC_FILES.values()}, p.PAYLOAD_FILES)
         self.assertEqual(s.PAYLOAD_FILES, p.PAYLOAD_FILES)
         for path, (name, kind) in s.STATIC_FILES.items():
             with self.subTest(path=path):

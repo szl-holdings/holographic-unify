@@ -1,5 +1,6 @@
 """Exact source presentation assets and preserved Space card boundaries."""
 import hashlib
+from html.parser import HTMLParser
 import json
 from pathlib import Path
 import re
@@ -16,7 +17,52 @@ EXPECTED = {
 }
 
 
+class EntryDocument(HTMLParser):
+    """Read actual resource elements; comments do not establish a binding."""
+
+    def __init__(self, text):
+        super().__init__()
+        self.resources = []
+        self.scripts = []
+        self.styles = 0
+        self.feed(text)
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == "script":
+            self.scripts.append(attrs)
+            self.resources.append((tag, attrs.get("src")))
+        elif tag == "img":
+            self.resources.append((tag, attrs.get("src")))
+        elif tag == "link":
+            self.resources.append((attrs.get("rel"), attrs.get("href")))
+        elif tag == "style":
+            self.styles += 1
+
+
 class NativeFrontendTests(unittest.TestCase):
+    def test_entrypoint_loads_only_the_native_local_resource_map(self):
+        document = EntryDocument((SPACE / "index.html").read_text(encoding="utf-8"))
+        self.assertEqual(document.resources, [
+            ("icon", "./favicon.svg"),
+            ("apple-touch-icon", "./apple-touch-icon.png"),
+            ("stylesheet", "./szl-tokens.css"),
+            ("stylesheet", "./unify.css"),
+            ("script", "./unify.js"),
+            ("img", "./szl-icon-32.svg"),
+        ])
+        self.assertEqual(len(document.scripts), 1)
+        self.assertIn("defer", document.scripts[0])
+        self.assertEqual(document.styles, 0)
+        for _, resource in document.resources:
+            with self.subTest(resource=resource):
+                self.assertTrue((SPACE / resource).is_file())
+                self.assertFalse((SPACE / resource).is_symlink())
+
+    def test_resource_parser_does_not_accept_commented_or_inline_bindings(self):
+        self.assertEqual(EntryDocument('<!-- <script src="./unify.js"></script> -->').resources, [])
+        self.assertEqual(EntryDocument('<script>/* ./unify.js */</script>').resources, [("script", None)])
+
     def test_native_projection_is_exact_and_distinguishes_the_installed_subset(self):
         projection = json.loads((SPACE / "szl-projection.json").read_bytes())
         self.assertEqual(projection["repository"], "https://github.com/szl-holdings/szl-brand")
@@ -40,6 +86,7 @@ class NativeFrontendTests(unittest.TestCase):
         self.assertLess(html.index('href="./szl-tokens.css"'), html.index('href="./unify.css"'))
         self.assertIn('src="./szl-icon-32.svg" width="40" height="40"', html)
         self.assertIn('href="./api/build-info"', html)
+        self.assertIn('width=device-width,initial-scale=1,viewport-fit=cover', html)
         self.assertNotRegex(html, r'<(?:svg|canvas)\b')
         self.assertNotIn('src="./szl-space-hologram.js"', html)
         self.assertRegex(html, r'id="appearance"[^>]+hidden')
@@ -49,6 +96,10 @@ class NativeFrontendTests(unittest.TestCase):
         self.assertIn('credentials: "omit"', script)
         self.assertIn('redirect: "error"', script)
         self.assertNotRegex(script, r'\b(?:innerHTML|localStorage|sessionStorage|setInterval)\b')
+        css = (SPACE / "unify.css").read_text()
+        for required in ["100dvh", "safe-area-inset-top", "safe-area-inset-right", "safe-area-inset-bottom", "safe-area-inset-left", "prefers-reduced-motion", "prefers-contrast", "forced-colors", "@media print"]:
+            self.assertIn(required, css)
+        self.assertNotRegex(css, r'@import\b|https?://|overflow-x:\s*(?:hidden|clip)')
 
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ async function inspect(page, forced = false) {
       if (!label || !el || el.closest('script,style,svg') || !visible(el) || el.closest('[disabled]')) continue;
       const s = getComputedStyle(el), range = document.createRange(); range.selectNodeContents(text);
       const rect = range.getBoundingClientRect(); if (!rect.width || !rect.height) continue;
-      if ((rect.left < -1 || rect.right > innerWidth + 1) && !boundedScroller(el) && !el.closest('.frontier-skip-link')) overflow.push({ text: label.slice(0, 90), left: rect.left, right: rect.right });
+      if ((rect.left < -1 || rect.right > innerWidth + 1) && !boundedScroller(el) && !el.closest('.skip-link')) overflow.push({ text: label.slice(0, 90), left: rect.left, right: rect.right });
       if (forced) continue;
       if (Number(s.opacity) !== 1) { uncertain.push(label.slice(0, 70)); continue; }
       const foreground = rgba(s.color), bg = backdrop(el), measured = Math.min(...bg.map(c => ratio(over(foreground, c), c)));
@@ -102,7 +102,7 @@ async function inspect(page, forced = false) {
     }
     assert.ok(ready, 'Staged runtime must start');
     browser = await chromium.launch({ headless: true, ...(process.env.UNIFY_BROWSER ? { executablePath: process.env.UNIFY_BROWSER } : {}), args: ['--no-sandbox', '--disable-dev-shm-usage'] });
-    for (const width of [1920, 1440, 1024, 768, 640, 375, 320]) {
+    for (const width of [2560, 1920, 1440, 1024, 768, 640, 375, 320]) {
       const current = await open({ viewport: { width, height: 1000 } });
       await current.page.getByText('Local source bytes verified', { exact: true }).waitFor();
       for (const theme of ['dark', 'light']) {
@@ -118,7 +118,13 @@ async function inspect(page, forced = false) {
       traffic(`${width}px`, current, 1);
       await current.context.close();
     }
-    for (const mode of [{ label: 'forced', forcedColors: 'active' }, { label: 'no-js', javaScriptEnabled: false }, { label: 'print' }]) {
+    const landscape = await open({ viewport: { width: 844, height: 390 } });
+    const landscapeResult = await inspect(landscape.page);
+    observations.push({ mode: 'landscape', ...landscapeResult });
+    check('landscape: responsive viewport without clipped content', landscapeResult.documentWidth <= 845 && !landscapeResult.overflow.length && !landscapeResult.textFailures.length && !landscapeResult.targets.length && !landscapeResult.unlabeled.length, landscapeResult);
+    traffic('landscape', landscape, 1);
+    await landscape.context.close();
+    for (const mode of [{ label: 'forced', forcedColors: 'active' }, { label: 'contrast', contrast: 'more' }, { label: 'no-js', javaScriptEnabled: false }, { label: 'print' }]) {
       const { label, ...options } = mode;
       const current = await open({ viewport: { width: 320, height: 900 }, ...options });
       if (label === 'print') await current.page.emulateMedia({ media: 'print' });
