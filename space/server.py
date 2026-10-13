@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import re
+import stat
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -17,7 +18,25 @@ if not 1 <= PORT <= 65535:
     raise ValueError("PORT must be between 1 and 65535")
 SOURCE = "szl-holdings/holographic-unify"
 TARGET = "SZLHOLDINGS/holographic-unify"
-PAYLOAD_FILES = {"Dockerfile", "README.md", "index.html", "server.py", "szl-space-hologram.css", "szl-space-hologram.js"}
+PAYLOAD_FILES = {
+    "Dockerfile", "README.md", "index.html", "server.py",
+    "szl-space-hologram.css", "szl-space-hologram.js", "unify.css", "unify.js",
+    "szl-tokens.css", "szl-icon-32.svg", "favicon.svg", "apple-touch-icon.png",
+    "szl-source.json", "szl-projection.json",
+}
+STATIC_FILES = {
+    "/": ("index.html", "text/html; charset=utf-8"),
+    "/szl-space-hologram.css": ("szl-space-hologram.css", "text/css; charset=utf-8"),
+    "/szl-space-hologram.js": ("szl-space-hologram.js", "text/javascript; charset=utf-8"),
+    "/unify.css": ("unify.css", "text/css; charset=utf-8"),
+    "/unify.js": ("unify.js", "text/javascript; charset=utf-8"),
+    "/szl-tokens.css": ("szl-tokens.css", "text/css; charset=utf-8"),
+    "/szl-icon-32.svg": ("szl-icon-32.svg", "image/svg+xml"),
+    "/favicon.svg": ("favicon.svg", "image/svg+xml"),
+    "/apple-touch-icon.png": ("apple-touch-icon.png", "image/png"),
+    "/szl-source.json": ("szl-source.json", "application/json"),
+    "/szl-projection.json": ("szl-projection.json", "application/json"),
+}
 HONESTY = {
     "surface": "SZL Holographic Unify", "github": SOURCE,
     "canonical_space": TARGET, "kind": "HOLOGRAM", "flagship": False,
@@ -110,8 +129,21 @@ class Handler(BaseHTTPRequestHandler):
                 }).encode()
             except (OSError, ValueError, TypeError, KeyError):
                 code, body = 503, b'{"state":"SOURCE_BINDING_UNAVAILABLE"}'
-        elif path == "/":
-            body, kind = (HERE / "index.html").read_bytes(), "text/html; charset=utf-8"
+        elif path in STATIC_FILES:
+            name, kind = STATIC_FILES[path]
+            try:
+                descriptor = os.open(HERE / name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+                try:
+                    if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+                        raise ValueError("nonregular static asset")
+                    with os.fdopen(descriptor, "rb", closefd=False) as stream:
+                        body = stream.read(8 * 1024 * 1024 + 1)
+                    if len(body) > 8 * 1024 * 1024:
+                        raise ValueError("static asset limit")
+                finally:
+                    os.close(descriptor)
+            except (OSError, ValueError):
+                code, kind, body = 503, "application/json", b'{"state":"STATIC_ASSET_UNAVAILABLE"}'
         else:
             code, body = 404, b'{"error":"not found"}'
         self._send(code, body, kind, head)

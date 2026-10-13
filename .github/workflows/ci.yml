@@ -78,6 +78,49 @@ jobs:
           done
           echo "container health: $health"
           test "$health" = healthy
+      - name: Qualify whole-repository image assets without claiming publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --tag holographic-unify:source-ci .
+          container="$(docker run --detach --publish 127.0.0.1:17861:7860 holographic-unify:source-ci)"
+          trap 'docker rm --force "$container" >/dev/null 2>&1 || true' EXIT
+          python -I -B - <<'PY'
+          import json
+          import runpy
+          import time
+          import urllib.error
+          from pathlib import Path
+
+          contract = runpy.run_path('scripts/verify_space.py')
+          request = contract['request']
+          base = 'http://127.0.0.1:17861'
+          for attempt in range(60):
+              try:
+                  assert request(base + '/healthz')[0] == 200
+                  break
+              except (OSError, AssertionError):
+                  if attempt == 59:
+                      raise
+                  time.sleep(1)
+          assets = {'/': 'text/html', **contract['STATIC_ASSETS']}
+          for route, kind in assets.items():
+              name = 'index.html' if route == '/' else route.removeprefix('/')
+              expected = (Path('space') / name).read_bytes()
+              status, body, actual_kind = request(base + route)
+              assert status == 200 and actual_kind == kind and body == expected, route
+              status, body, actual_kind = request(base + route, method='HEAD')
+              assert status == 200 and actual_kind == kind and body == b'', route
+          for route in ('/readyz', '/api/build-info'):
+              try:
+                  request(base + route)
+              except urllib.error.HTTPError as response:
+                  assert response.code == 503, route
+                  assert json.loads(response.read())['state'] == 'SOURCE_BINDING_UNAVAILABLE', route
+              else:
+                  raise AssertionError('raw image must not invent publication identity: ' + route)
+          print('Whole-repository image: 11 exact GET/HEAD asset routes; publication identity unavailable')
+          PY
   grok-contract:
     name: grok-contract
     runs-on: ubuntu-24.04

@@ -19,7 +19,19 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SPACE = ROOT / "space"
-PAYLOAD_FILES = {"Dockerfile", "README.md", "index.html", "server.py", "szl-space-hologram.css", "szl-space-hologram.js"}
+PAYLOAD_FILES = {
+    "Dockerfile", "README.md", "index.html", "server.py",
+    "szl-space-hologram.css", "szl-space-hologram.js", "unify.css", "unify.js",
+    "szl-tokens.css", "szl-icon-32.svg", "favicon.svg", "apple-touch-icon.png",
+    "szl-source.json", "szl-projection.json",
+}
+STATIC_ASSETS = {
+    "/szl-space-hologram.css": "text/css", "/szl-space-hologram.js": "text/javascript",
+    "/unify.css": "text/css", "/unify.js": "text/javascript",
+    "/szl-tokens.css": "text/css", "/szl-icon-32.svg": "image/svg+xml",
+    "/favicon.svg": "image/svg+xml", "/apple-touch-icon.png": "image/png",
+    "/szl-source.json": "application/json", "/szl-projection.json": "application/json",
+}
 EXPECTED_HONESTY: dict[str, Any] = {
     "surface": "SZL Holographic Unify",
     "github": "szl-holdings/holographic-unify",
@@ -108,6 +120,10 @@ def verify_url(
             require(health_type == "application/json", f"unexpected health content type: {health_type}")
             require(ready_type == "application/json", f"unexpected readiness content type: {ready_type}")
             require(b"Wave 2026 admitted" in root_body, "expected hologram marker missing")
+            for asset_path, content_type in STATIC_ASSETS.items():
+                status, body, actual_type = request(base + asset_path)
+                require(status == 200 and actual_type == content_type, f"static asset unavailable: {asset_path}")
+                require(body == (SPACE / asset_path.removeprefix("/")).read_bytes(), f"static asset bytes differ: {asset_path}")
             health = json.loads(health_body)
             ready = json.loads(ready_body)
             honesty = json.loads(honesty_body)

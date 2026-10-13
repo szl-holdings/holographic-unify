@@ -75,5 +75,34 @@ class RuntimeHttpTests(unittest.TestCase):
         self.assertEqual(status,200)
         self.assertIs(json.loads(body)['ready'],True)
 
+    def test_every_fixed_static_route_serves_the_published_bytes_and_mime(self):
+        self.assertLessEqual({name for name, _ in s.STATIC_FILES.values()}, p.PAYLOAD_FILES)
+        self.assertEqual(s.PAYLOAD_FILES, p.PAYLOAD_FILES)
+        for path, (name, kind) in s.STATIC_FILES.items():
+            with self.subTest(path=path):
+                status, body, headers = self.request(path + '?v=local-proof')
+                self.assertEqual(status, 200)
+                self.assertEqual(body, self.files[name])
+                self.assertEqual(headers['Content-Type'], kind)
+                self.assertEqual(headers['X-Content-Type-Options'], 'nosniff')
+                self.assertEqual(headers['Cache-Control'], 'no-store')
+                status, body, headers = self.request(path, 'HEAD')
+                self.assertEqual(status, 200)
+                self.assertEqual(body, b'')
+                self.assertEqual(int(headers['Content-Length']), len(self.files[name]))
+
+    def test_static_routes_do_not_expose_source_code_or_follow_paths_and_symlinks(self):
+        for path in ['/server.py', '/Dockerfile', '/README.md', '/../server.py', '/%2e%2e/server.py', '/szl-icon-32.svg/../server.py']:
+            with self.subTest(path=path):
+                self.assertEqual(self.request(path)[0], 404)
+        asset = self.root / 'unify.css'
+        asset.unlink()
+        asset.symlink_to(self.root / 'server.py')
+        status, body, _ = self.request('/unify.css')
+        self.assertEqual(status, 503)
+        self.assertEqual(json.loads(body)['state'], 'STATIC_ASSET_UNAVAILABLE')
+        asset.unlink()
+        self.assertEqual(self.request('/unify.css')[0], 503)
+
 
 if __name__=='__main__': unittest.main(verbosity=2)

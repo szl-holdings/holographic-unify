@@ -8,8 +8,14 @@
 FROM mirror.gcr.io/library/python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170
 WORKDIR /app
 ENV HOST=0.0.0.0 PORT=7860 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
-COPY space/server.py ./server.py
-COPY space/index.html ./index.html
+# Copy the closed source payload, including every native and retained static asset.
+# Raw whole-repo builds have no publication deployment.json, so source identity
+# and /readyz remain unavailable until an actual publication document is supplied.
+COPY space/Dockerfile space/README.md space/index.html space/server.py \
+     space/szl-space-hologram.css space/szl-space-hologram.js \
+     space/unify.css space/unify.js space/szl-tokens.css \
+     space/szl-icon-32.svg space/favicon.svg space/apple-touch-icon.png \
+     space/szl-source.json space/szl-projection.json ./
 EXPOSE 7860
 # Process liveness only: /healthz answers 200 whenever the server runs.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
