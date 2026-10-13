@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title description">
+  <title id="title">Holographic Unify — Source Repository</title>
+  <desc id="description">Inspect the estate command hologram, PEFT composition blueprints and declared serve gates. Evidence label: REPORTED. Operational state: UNKNOWN.</desc>
+  <defs>
+    <linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#030F29"/><stop offset="0.56" stop-color="#071421"/><stop offset="1" stop-color="#0A1724"/></linearGradient>
+    <radialGradient id="glow" cx="82%" cy="42%" r="57%"><stop offset="0" stop-color="#9AA7BD" stop-opacity="0.16"/><stop offset="0.55" stop-color="#E9EEF6" stop-opacity="0.06"/><stop offset="1" stop-color="#030F29" stop-opacity="0"/></radialGradient>
+    <linearGradient id="hairline" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9AA7BD" stop-opacity="0.72"/><stop offset="0.52" stop-color="#47D7C4" stop-opacity="0.46"/><stop offset="1" stop-color="#E9EEF6" stop-opacity="0.08"/></linearGradient>
+    <filter id="soft-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1280" height="640" rx="30" fill="url(#surface)"/>
+  <rect width="1280" height="640" rx="30" fill="url(#glow)"/>
+  <rect x="1" y="1" width="1278" height="638" rx="29" fill="none" stroke="#9AA7BD" stroke-opacity="0.18"/>
+  <path d="M0 0 H1280" stroke="url(#hairline)" stroke-width="4"/>
+  <path d="M56 58 H1224" stroke="#9AA7BD" stroke-opacity="0.14"/>
+  <circle cx="75" cy="58" r="5" fill="#9AA7BD" filter="url(#soft-glow)"/>
+  <text x="94" y="64" fill="#B6C0CE" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" font-weight="700" letter-spacing="2.2">SZL / SOURCE REPOSITORY / 383c16e7ac6b</text>
+  <g aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="1002" cy="310" r="92" stroke="#9AA7BD" stroke-width="2" opacity="0.16"/>
+<circle cx="1002" cy="310" r="156" stroke="#E9EEF6" stroke-width="2" opacity="0.18"/>
+<circle cx="1002" cy="310" r="226" stroke="#47D7C4" stroke-width="1" opacity="0.20"/>
+<circle cx="1002" cy="310" r="302" stroke="#9AA7BD" stroke-width="1" opacity="0.22"/>
+<path d="M1002 310 l286 0" transform="rotate(0 1002 310)" stroke="#E9EEF6" stroke-width="1" opacity="0.10"/>
+<path d="M1002 310 l237 0" transform="rotate(45 1002 310)" stroke="#E9EEF6" stroke-width="1" opacity="0.10"/>
+<path d="M1002 310 l239 0" transform="rotate(90 1002 310)" stroke="#E9EEF6" stroke-width="1" opacity="0.10"/>
+<path d="M1002 310 l263 0" transform="rotate(135 1002 310)" stroke="#E9EEF6" stroke-width="1" opacity="0.10"/>
+<path d="M1002 310 l254 0" transform="rotate(180 1002 310)" stroke="#E9EEF6" stroke-width="1" opacity="0.10"/>
+<path d="M1002 310 l275 0" transform="rotate(225 1002 310)" stroke="#E9EEF6" stroke-width="1" opacity="0.10"/>
+<path d="M1002 310 l300 0" transform="rotate(270 1002 310)" stroke="#E9EEF6" stroke-width="1" opacity="0.10"/>
+<path d="M1002 310 l244 0" transform="rotate(315 1002 310)" stroke="#E9EEF6" stroke-width="1" opacity="0.10"/>
+<rect x="974" y="230" width="56" height="160" rx="20" fill="#9AA7BD" fill-opacity="0.18" stroke="#9AA7BD" stroke-width="2"/>
+</g>
+  <g font-family="Aptos, system-ui, -apple-system, Segoe UI, sans-serif">
+    <text x="74" y="158" fill="#F4F6F8" font-size="68" font-weight="750" letter-spacing="-2.7"><tspan x="74" dy="0">Holographic Unify</tspan></text>
+    <text x="76" y="252" fill="#C9D3DF" font-size="24" font-weight="430"><tspan x="76" dy="0">Inspect the estate command hologram, PEFT composition</tspan><tspan x="76" dy="31">blueprints and declared serve gates.</tspan></text>
+    <g transform="translate(74 334)"><rect width="222" height="46" rx="23" fill="#9AA7BD" fill-opacity="0.11" stroke="#9AA7BD" stroke-opacity="0.48"/><circle cx="23" cy="23" r="5" fill="#9AA7BD"/><text x="39" y="29" fill="#E9EEF6" font-size="14" font-weight="700" letter-spacing="1.1">REPORTED</text></g>
+    <g transform="translate(310 334)"><rect width="232" height="46" rx="23" fill="#101824" stroke="#9AA7BD" stroke-opacity="0.35"/><path d="M22 16 v14 M15 23 h14" stroke="#47D7C4" stroke-width="2"/><text x="42" y="29" fill="#E9EEF6" font-size="14" font-weight="700" letter-spacing="1.1">UNKNOWN</text></g>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="13"><text x="75" y="566" fill="#8592A5">CONTROL BEFORE ACTION</text><path d="M264 561 H282 M276 555 L282 561 L276 567" fill="none" stroke="#9AA7BD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="294" y="566" fill="#8592A5">EVIDENCE AFTER</text><text x="1206" y="566" text-anchor="end" fill="#8592A5">github.com/szl-holdings/holographic-unify</text></g>
+  <circle cx="62" cy="593" r="1.5" fill="#E9EEF6" opacity="0.13"/><circle cx="133" cy="593" r="1.5" fill="#E9EEF6" opacity="0.12"/><circle cx="211" cy="593" r="1.5" fill="#E9EEF6" opacity="0.12"/><circle cx="265" cy="593" r="1.5" fill="#E9EEF6" opacity="0.06"/><circle cx="330" cy="593" r="1.5" fill="#E9EEF6" opacity="0.13"/><circle cx="401" cy="593" r="1.5" fill="#E9EEF6" opacity="0.08"/><circle cx="464" cy="593" r="1.5" fill="#E9EEF6" opacity="0.11"/><circle cx="536" cy="593" r="1.5" fill="#E9EEF6" opacity="0.06"/><circle cx="603" cy="593" r="1.5" fill="#E9EEF6" opacity="0.13"/><circle cx="668" cy="593" r="1.5" fill="#E9EEF6" opacity="0.08"/><circle cx="730" cy="593" r="1.5" fill="#E9EEF6" opacity="0.09"/><circle cx="794" cy="593" r="1.5" fill="#E9EEF6" opacity="0.08"/><circle cx="869" cy="593" r="1.5" fill="#E9EEF6" opacity="0.11"/><circle cx="922" cy="593" r="1.5" fill="#E9EEF6" opacity="0.09"/><circle cx="999" cy="593" r="1.5" fill="#E9EEF6" opacity="0.10"/><circle cx="1058" cy="593" r="1.5" fill="#E9EEF6" opacity="0.12"/><circle cx="1123" cy="593" r="1.5" fill="#E9EEF6" opacity="0.09"/>
+  <circle cx="1192" cy="58" r="6" fill="#47D7C4" filter="url(#soft-glow)"/>
+  <text x="1211" y="64" fill="#9AA7BD" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="13">V1</text>
+</svg>
