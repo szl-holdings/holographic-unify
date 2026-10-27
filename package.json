@@ -24,9 +24,9 @@
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",
-    "@hookform/resolvers": "^5.7.0",
+    "@hookform/resolvers": "^6.0.0",
     "better-auth": "~1.7.6",
-    "jose": "6.2.12",
+    "jose": "6.2.13",
     "kysely": "^0.29.6",
     "pg": "^8.16.3",
     "@radix-ui/react-accordion": "^1.2.12",
