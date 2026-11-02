@@ -87,8 +87,14 @@ export type GrokDeps = {
   random?: () => number;
 };
 
+export type GrokCompletion = Record<string, unknown> & {
+  model?: string;
+  choices: [{ message: { content: string } }, ...unknown[]];
+  usage: { prompt_tokens: number; completion_tokens: number };
+};
+
 export type GrokCall =
-  | { ok: true; body: Record<string, unknown>; attempts: number; elapsedMs: number }
+  | { ok: true; body: GrokCompletion; attempts: number; elapsedMs: number }
   | { ok: false; error: string; attempts: number };
 
 export function isRetryableStatus(status: number): boolean {
@@ -122,13 +128,28 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function isTokenCount(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+/** Validate the text and measurements consumed by runServe before admitting success. */
+function isCompletion(value: unknown): value is GrokCompletion {
+  if (!isRecord(value) || !Array.isArray(value.choices) || !isRecord(value.choices[0])) return false;
+  const message = value.choices[0].message;
+  if (!isRecord(message) || typeof message.content !== "string" || !message.content.trim()) return false;
+  if (!isRecord(value.usage)
+    || !isTokenCount(value.usage.prompt_tokens)
+    || !isTokenCount(value.usage.completion_tokens)) return false;
+  return value.model === undefined || (typeof value.model === "string" && value.model.trim().length > 0);
+}
+
 const sleepFor = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /**
  * POST one non-streaming chat completion to xAI. A missing or blank key, a
  * `payload.model` outside ALLOWED_GROK_MODELS, or a parameter that reasoning
- * models reject fails closed before any request. Returns the parsed JSON
- * object on success; every failure is a fixed gate message that never
+ * models reject fails closed before any request. Returns a validated text
+ * completion with observed token counts on success; every failure is a fixed gate message that never
  * includes the key, the configured model value, the provider body, or an
  * exception message.
  */
@@ -193,7 +214,7 @@ export async function postGrok(
           if (signal.aborted) return { ok: false, error: timedOut(), attempts };
           return { ok: false, error: "Gate returned a malformed completion. Honest fail-closed.", attempts };
         }
-        if (!isRecord(parsed)) {
+        if (!isCompletion(parsed)) {
           return { ok: false, error: "Gate returned a malformed completion. Honest fail-closed.", attempts };
         }
         return { ok: true, body: parsed, attempts, elapsedMs };

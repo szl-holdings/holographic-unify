@@ -145,4 +145,10 @@ Any other value fails closed as `Gate UNAVAILABLE` with no provider request. It
 never falls back to the default. Adding an id to the allowlist is a model change
 and needs its own review.
 
+A successful HTTP response must contain a nonempty first text completion and
+observed prompt/completion token counts as nonnegative safe integers. Missing
+counts are unavailable, not zero measurements. Malformed completions return the
+fixed failure message without retry or provider diagnostics. A reported model
+must be nonblank text; an omitted model keeps the requested-model fallback.
+
 Apache-2.0 · Doctrine v11 LOCKED · Copyright 2026 SZL Holdings.
