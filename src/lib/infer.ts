@@ -56,12 +56,8 @@ export const runServe = createServerFn({ method: "POST" })
       return { ok: false, error: call.error };
     }
     const { elapsedMs, attempts } = call;
-    const body = call.body as {
-      model?: string;
-      choices?: { message?: { content?: string } }[];
-      usage?: { completion_tokens?: number; prompt_tokens?: number };
-    };
-    const text = body.choices?.[0]?.message?.content?.trim() ?? "";
+    const body = call.body;
+    const text = body.choices[0].message.content.trim();
     if (!text) return { ok: false, error: "Empty completion. UNSIGNED-honest silence." };
     const requestHash = await sha256hex(`${data.adapter}|${data.frontier}|${data.prompt}`);
     const outputHash = await sha256hex(text);
@@ -72,8 +68,8 @@ export const runServe = createServerFn({ method: "POST" })
       runtime: "xAI gate hologram · not SZL-Khipu-1.5B-GGUF weights · GPU vLLM ROADMAP",
       elapsedMs,
       attempts,
-      completionTokens: body.usage?.completion_tokens ?? 0,
-      promptTokens: body.usage?.prompt_tokens ?? 0,
+      completionTokens: body.usage.completion_tokens,
+      promptTokens: body.usage.prompt_tokens,
       energy: "UNAVAILABLE",
       joules: null,
       requestHash,

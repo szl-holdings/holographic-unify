@@ -346,3 +346,72 @@ test("backoffMs is exponential, jittered within [half, full] and capped", () => 
   assert.equal(backoffMs(10, p, () => 0), 2_000);
   assert.equal(backoffMs(1, p, () => 7), 500);
 });
+
+function completionBody(): Record<string, unknown> {
+  return {
+    model: DEFAULT_GROK_MODEL,
+    choices: [{ message: { content: "measured" } }],
+    usage: { prompt_tokens: 3, completion_tokens: 1 },
+  };
+}
+
+const malformedCompletions: [string, unknown][] = [
+  ["empty object", {}],
+  ["provider error object", { error: `provider echo ${KEY}` }],
+  ...[undefined, null, {}, [], "text"].map((choices): [string, unknown] => [
+    `choices ${JSON.stringify(choices)}`, { ...completionBody(), choices },
+  ]),
+  ...[null, "text", [], {}, { message: null }, { message: "text" }, { message: {} }].map((choice): [string, unknown] => [
+    `choice ${JSON.stringify(choice)}`, { ...completionBody(), choices: [choice] },
+  ]),
+  ...[null, 7, true, {}, [], "", "  \n"].map((content): [string, unknown] => [
+    `content ${JSON.stringify(content)}`, { ...completionBody(), choices: [{ message: { content } }] },
+  ]),
+  ...[undefined, null, [], "counts", {}].map((usage): [string, unknown] => [
+    `usage ${JSON.stringify(usage)}`, { ...completionBody(), usage },
+  ]),
+  ...["prompt_tokens", "completion_tokens"].flatMap((field) =>
+    [undefined, null, "3", true, -1, 0.5, Number.MAX_SAFE_INTEGER + 1].map((value): [string, unknown] => [
+      `${field} ${JSON.stringify(value)}`,
+      { ...completionBody(), usage: { prompt_tokens: 3, completion_tokens: 1, [field]: value } },
+    ])),
+  ...[null, 7, false, [], {}, "", " \n"].map((model): [string, unknown] => [
+    `model ${JSON.stringify(model)}`, { ...completionBody(), model },
+  ]),
+];
+
+for (const [name, body] of malformedCompletions) {
+  test(`malformed completion fields fail closed: ${name}`, async (t) => {
+    const stub = t.mock.method(globalThis, "fetch", async () => Response.json(body));
+    const { waits, deps } = recorder();
+    const out = await postGrok(payload, KEY, GROK_POLICY, deps);
+    assert.equal(out.ok, false);
+    if (!out.ok) {
+      assert.match(out.error, /malformed completion/);
+      assertNoLeak(out.error);
+      assert.equal(out.attempts, 1);
+    }
+    assert.equal(stub.mock.callCount(), 1);
+    assert.deepEqual(waits, []);
+  });
+}
+
+test("valid zero counts and absent optional model preserve the response", async (t) => {
+  const body = {
+    choices: [{ message: { content: " zero is observed " }, finish_reason: "stop" }],
+    usage: { prompt_tokens: 0, completion_tokens: 0 },
+    provider_metadata: "retained",
+  };
+  t.mock.method(globalThis, "fetch", async () => Response.json(body));
+  const out = await postGrok(payload, KEY);
+  assert.equal(out.ok, true);
+  if (out.ok) assert.deepEqual(out.body, body);
+});
+
+test("overflowing JSON token numbers cannot become measurement evidence", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => new Response(
+    '{"choices":[{"message":{"content":"text"}}],"usage":{"prompt_tokens":1e999,"completion_tokens":1}}',
+    { status: 200, headers: { "Content-Type": "application/json" } },
+  ));
+  assert.equal((await postGrok(payload, KEY)).ok, false);
+});
