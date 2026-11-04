@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: "holographic-unify — SZL holographic unify"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - name: "SZL Holdings"
+repository-code: "https://github.com/szl-holdings/holographic-unify"
+license: Apache-2.0
