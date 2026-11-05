@@ -152,5 +152,5 @@ jobs:
         with:
           name: native-space-presentation
           path: artifacts/native-frontend
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 7

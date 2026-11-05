@@ -168,28 +168,57 @@ def publication(api: Any, download: Callable[[str, str], bytes], add: Callable[.
         require(download(name, revision) == body, "PROVIDER_BYTES_MISMATCH")
     receipt.update(status="PROVIDER_VERIFIED", exact_bytes=True)
     persist()
-    wait_for_runtime(api, revision, files, source, fresh, read, timeout, sleep)
+
+    def note(stage: str | None, runtime_sha: str | None) -> None:
+        if stage is not None:
+            receipt["runtime_stage"] = stage
+        if runtime_sha is not None:
+            receipt["runtime_sha"] = runtime_sha
+
+    wait_for_runtime(api, revision, files, source, fresh, read, timeout, sleep, note)
     receipt.update(status="RUNTIME_VERIFIED", runtime_revision=revision)
     persist()
 
 
+def runtime_mapping(runtime: Any) -> Mapping[str, Any]:
+    if runtime is None:
+        return {}
+    if not isinstance(runtime, Mapping):
+        # The pinned Hub client exposes SpaceRuntime, not a dictionary.
+        runtime = getattr(runtime, "raw", None)
+    require(isinstance(runtime, Mapping), "INVALID_PROVIDER_RUNTIME")
+    return runtime
+
+
+def observed_token(value: Any, pattern: re.Pattern[str]) -> str | None:
+    return value if isinstance(value, str) and pattern.fullmatch(value) else None
+
+
 def wait_for_runtime(api: Any, revision: str, files: Mapping[str, bytes], source: str,
                      fresh: Callable[[], str], read: Callable[[str], bytes],
-                     timeout: float, sleep: Callable[[float], None]) -> None:
+                     timeout: float, sleep: Callable[[float], None],
+                     note: Callable[[str | None, str | None], None] = lambda *_: None) -> None:
+    """Wait until this provider revision is running and serving its own bytes.
+
+    BUILD_ERROR and RUNTIME_ERROR are fatal only when the runtime sha is the
+    revision just committed. PAUSED and STOPPED are the slept or restarting
+    factory state (cpu-basic gc), including when the repo sha has already moved,
+    and a previous revision's terminal stage is not evidence against this one.
+    Neither becomes a successful release: the loop still requires RUNNING plus
+    the served bytes, and the deadline remains a hard failure.
+    """
     deadline = time.monotonic() + timeout
+    stage_token = re.compile(r"[A-Z0-9_]{1,40}")
     while time.monotonic() < deadline:
         info = api.space_info(SPACE_ID)
         require(exact_sha(info.sha) == revision, "PROVIDER_SUPERSEDED")
-        runtime = info.runtime
-        if runtime is None:
-            runtime = {}
-        elif not isinstance(runtime, Mapping):
-            # The pinned Hub client exposes SpaceRuntime, not a dictionary.
-            runtime = getattr(runtime, "raw", None)
-        require(isinstance(runtime, Mapping), "INVALID_PROVIDER_RUNTIME")
-        stage = runtime.get("stage")
-        require(stage not in {"BUILD_ERROR", "RUNTIME_ERROR", "PAUSED", "STOPPED"}, "RUNTIME_TERMINAL")
-        if stage == "RUNNING" and runtime.get("sha") == revision:
+        runtime = runtime_mapping(info.runtime)
+        stage = observed_token(runtime.get("stage"), stage_token)
+        runtime_sha = observed_token(runtime.get("sha"), SHA40)
+        note(stage, runtime_sha)
+        if runtime_sha == revision and stage in {"BUILD_ERROR", "RUNTIME_ERROR"}:
+            raise PublicationError("RUNTIME_TERMINAL")
+        if stage == "RUNNING" and runtime_sha == revision:
             try:
                 require(read("/") == files["index.html"], "RUNTIME_ROOT_MISMATCH")
                 require(read("/deployment.json") == files["deployment.json"], "RUNTIME_SOURCE_MISMATCH")
@@ -254,8 +283,11 @@ def main() -> int:
         receipt.update(status="FAILED", failed_phase=receipt["status"],
                        error_code=str(exc) if isinstance(exc, PublicationError) else type(exc).__name__)
         persist()
-        print(json.dumps({"status": "FAILED", "error_code": receipt["error_code"],
-                          "receipt_path": str(receipt_path)}))
+        summary = {"status": "FAILED", "error_code": receipt["error_code"],
+                   "receipt_path": str(receipt_path)}
+        if "runtime_stage" in receipt:
+            summary["runtime_stage"] = receipt["runtime_stage"]
+        print(json.dumps(summary))
         return 1
 
 

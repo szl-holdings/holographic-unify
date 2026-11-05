@@ -101,6 +101,11 @@ class NativeFrontendTests(unittest.TestCase):
             self.assertIn(required, css)
         self.assertNotRegex(css, r'@import\b|https?://|overflow-x:\s*(?:hidden|clip)')
 
+    def test_presentation_evidence_upload_fails_closed_when_missing(self):
+        workflow = (ROOT / ".github/workflows/szl-holographic-space-v2.yml").read_text(encoding="utf-8")
+        self.assertIn("if-no-files-found: error", workflow)
+        self.assertNotIn("if-no-files-found: warn", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()
