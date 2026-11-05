@@ -201,7 +201,7 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(self.saved[-1]['status'], 'PROVIDER_VERIFIED')
 
     def test_sdk_runtime_terminal_states_remain_rejected(self):
-        for stage in ('BUILD_ERROR', 'RUNTIME_ERROR', 'PAUSED', 'STOPPED'):
+        for stage in ('BUILD_ERROR', 'RUNTIME_ERROR'):
             self.setUp()
             self.use_runtime_shape(lambda raw, value=stage: SimpleNamespace(
                 raw={'stage': value, 'sha': raw['sha']}))
@@ -209,6 +209,52 @@ class ProviderTests(unittest.TestCase):
                     p.PublicationError, '^RUNTIME_TERMINAL$'):
                 self.execute()
             self.assertEqual(self.saved[-1]['status'], 'PROVIDER_VERIFIED')
+            self.assertEqual(self.receipt.get('runtime_stage'), stage)
+            self.assertEqual(self.receipt.get('runtime_sha'), C)
+
+    def test_sleep_and_stop_wait_instead_of_false_terminal(self):
+        """cpu-basic pause is the pre-build factory state, not a failed revision."""
+        for stage in ('PAUSED', 'STOPPED'):
+            self.setUp()
+            self.use_runtime_shape(lambda raw, value=stage: SimpleNamespace(
+                raw={'stage': value, 'sha': raw['sha']}))
+            with self.subTest(stage=stage), patch.object(self, 'read', wraps=self.read) as read, \
+                    patch.object(p.time, 'monotonic', side_effect=[0, 0, 0, 2]), \
+                    self.assertRaisesRegex(p.PublicationError, '^RUNTIME_TIMEOUT$'):
+                self.execute()
+            read.assert_not_called()
+            self.assertEqual(self.saved[-1]['status'], 'PROVIDER_VERIFIED')
+            self.assertNotEqual(self.receipt.get('status'), 'RUNTIME_VERIFIED')
+            self.assertEqual(self.receipt.get('runtime_stage'), stage)
+            self.assertEqual(self.receipt.get('runtime_sha'), C)
+
+    def test_slept_revision_is_verified_only_after_it_runs(self):
+        for stage in ('PAUSED', 'STOPPED'):
+            self.setUp()
+            state = {'n': 0}
+            def shape(raw, value=stage):
+                state['n'] += 1
+                observed = value if state['n'] == 2 else raw['stage']
+                return SimpleNamespace(raw={'stage': observed, 'sha': raw['sha']})
+            self.use_runtime_shape(shape)
+            with self.subTest(stage=stage):
+                self.execute()
+            self.assertEqual(self.receipt['status'], 'RUNTIME_VERIFIED')
+            self.assertEqual(self.receipt['runtime_revision'], C)
+            self.assertEqual(self.receipt.get('runtime_stage'), 'RUNNING')
+            self.assertEqual(self.receipt.get('runtime_sha'), C)
+
+    def test_previous_revision_terminal_stage_does_not_abort(self):
+        state = {'n': 0}
+        def shape(raw):
+            state['n'] += 1
+            if state['n'] == 2:
+                return SimpleNamespace(raw={'stage': 'RUNTIME_ERROR', 'sha': B})
+            return SimpleNamespace(raw=raw)
+        self.use_runtime_shape(shape)
+        self.execute()
+        self.assertEqual(self.receipt['status'], 'RUNTIME_VERIFIED')
+        self.assertEqual(self.receipt['runtime_sha'], C)
 
     def test_one_atomic_commit_is_bound_to_parent_and_read_back(self):
         self.execute()
