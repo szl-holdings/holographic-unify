@@ -5,7 +5,7 @@
 # image-index digest that both mirror.gcr.io and registry-1.docker.io returned
 # for that tag on 2026-09-29 (3.14.7-slim-trixie; includes linux/amd64).
 # Dependabot (docker, /) moves the tag and the digest together.
-FROM mirror.gcr.io/library/python:3.15-slim@sha256:8c13a3f37a6a5b71498228e902c4b9f51c1f7900d49fabf71f9a650c6120e0d0
+FROM mirror.gcr.io/library/python:3.15-slim@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928
 WORKDIR /app
 ENV HOST=0.0.0.0 PORT=7860 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 # Copy the closed source payload, including every native and retained static asset.
