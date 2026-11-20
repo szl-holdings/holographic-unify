@@ -94,6 +94,7 @@ class NativeFrontendTests(unittest.TestCase):
         script = (SPACE / "unify.js").read_text()
         self.assertEqual(len(re.findall(r'\bfetch\(', script)), 1)
         self.assertIn('credentials: "omit"', script)
+        self.assertIn('/^0{40}$/.test(sha)', script)
         self.assertIn('redirect: "error"', script)
         self.assertNotRegex(script, r'\b(?:innerHTML|localStorage|sessionStorage|setInterval)\b')
         css = (SPACE / "unify.css").read_text()
