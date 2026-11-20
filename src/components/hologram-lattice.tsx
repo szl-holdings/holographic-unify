@@ -1,5 +1,5 @@
 import { ORGANS, type OrganId } from "@/lib/catalog";
-import { SOTA_JOBS, type SotaStatus } from "@/lib/sota";
+import { SOTA_JOBS, catalogStatusSummary, type SotaStatus } from "@/lib/sota";
 
 const ORGAN_POS: Record<OrganId, number> = {
   YACHAY: -Math.PI / 2,
@@ -47,7 +47,7 @@ export function HologramLattice({
         viewBox="0 0 400 300"
         className="block h-auto w-full"
         role="group"
-        aria-label="Holographic organ lattice. Activate a node to filter the unified catalog."
+        aria-label="Holographic organ lattice of curated catalog labels, not verified live runtime. Activate a node to filter the unified catalog."
       >
         <defs>
           <radialGradient id="holo-glow" cx="50%" cy="50%" r="50%">
@@ -93,7 +93,7 @@ export function HologramLattice({
 
         {nodes.map((n) => {
           const on = selected === n.id;
-          const live = n.jobs.filter((j) => j.status === "LIVE").length;
+          const catalog = catalogStatusSummary(n.jobs);
           return (
             <g key={`btn-${n.id}`}>
               <circle
@@ -133,7 +133,7 @@ export function HologramLattice({
                 fontFamily="ui-monospace, SF Mono, Menlo, monospace"
                 className="pointer-events-none"
               >
-                {live}/{n.jobs.length}
+                {catalog.catalogLiveLabels}/{catalog.total}
               </text>
             </g>
           );
@@ -181,6 +181,10 @@ export function HologramLattice({
           </text>
         </g>
       </svg>
+      <p role="note" className="px-3 pb-2 text-xs text-[var(--color-muted)]">
+        Curated catalog counts only. LIVE labels do not verify authenticated runtime data,
+        measured inference, or signed receipts.
+      </p>
     </div>
   );
 }
