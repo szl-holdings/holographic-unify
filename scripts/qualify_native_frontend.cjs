@@ -71,7 +71,7 @@ async function inspect(page, forced = false) {
 (async () => {
   fs.mkdirSync(out, { recursive: true });
   const runtime = fs.mkdtempSync(path.join(out, 'runtime-'));
-  const python = "import os,runpy;from pathlib import Path;p=runpy.run_path('scripts/publish_space.py');d=Path(os.environ['UNIFY_QA_RUNTIME']);files=p['payload']('a'*40);[(d/n).write_bytes(b) for n,b in files.items()];runpy.run_path(str(d/'server.py'),run_name='__main__')";
+  const python = "import os,runpy;from pathlib import Path;p=runpy.run_path('scripts/publish_space.py');d=Path(os.environ['UNIFY_QA_RUNTIME']);files=p['payload']('a'*40);[(d/n).parent.mkdir(parents=True,exist_ok=True) for n in files];[(d/n).write_bytes(b) for n,b in files.items()];runpy.run_path(str(d/'server.py'),run_name='__main__')";
   const log = fs.createWriteStream(path.join(out, 'preview.log'));
   const server = spawn(process.env.PYTHON || 'python3', ['-B', '-c', python], { cwd: root, env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', UNIFY_QA_RUNTIME: runtime, HOST: '127.0.0.1', PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });
   server.stdout.pipe(log); server.stderr.pipe(log);
