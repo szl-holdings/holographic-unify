@@ -31,6 +31,20 @@ export type HfSoftware = {
   note: string;
 };
 
+/**
+ * Curated catalog labels are not provider observations. This summary never
+ * upgrades a static LIVE designation to authenticated runtime or signed proof.
+ */
+export function catalogStatusSummary(jobs: readonly Pick<SotaJob, "status">[]) {
+  return {
+    total: jobs.length,
+    catalogLiveLabels: jobs.filter((job) => job.status === "LIVE").length,
+    runtimeVerified: false as const,
+    signedReceiptVerified: false as const,
+    evidenceSource: "CURATED_SOURCE_CATALOG" as const,
+  };
+}
+
 export const SOTA_JOBS: SotaJob[] = [
   {
     job: "Unified model API",
