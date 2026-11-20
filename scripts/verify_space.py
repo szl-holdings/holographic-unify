@@ -162,7 +162,9 @@ def verify_url(
 
 def verify_local(timeout: float) -> dict[str, Any]:
     publisher = runpy.run_path(str(ROOT / "scripts" / "publish_space.py"))
-    staged_payload = publisher["payload"]("0" * 40)
+    # A real source binding cannot use the null Git revision. This local-only
+    # synthetic positive fixture uses a nonzero revision, not a live Git claim.
+    staged_payload = publisher["payload"]("a" * 40)
     with tempfile.TemporaryDirectory() as temporary:
         runtime = Path(temporary)
         for name, body in staged_payload.items():

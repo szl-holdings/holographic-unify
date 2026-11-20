@@ -1,5 +1,5 @@
 /* Qualify only the staged, source-owned stdlib Space on loopback.
- * Its all-zero source revision is an explicit local fixture, never a release.
+ * Its nonzero synthetic source revision is only a local fixture, never a release.
  * Requires the existing Playwright dev dependency; does not publish anything.
  * SPDX-License-Identifier: Apache-2.0 */
 const assert = require('node:assert/strict');
@@ -71,7 +71,7 @@ async function inspect(page, forced = false) {
 (async () => {
   fs.mkdirSync(out, { recursive: true });
   const runtime = fs.mkdtempSync(path.join(out, 'runtime-'));
-  const python = "import os,runpy;from pathlib import Path;p=runpy.run_path('scripts/publish_space.py');d=Path(os.environ['UNIFY_QA_RUNTIME']);files=p['payload']('0'*40);[(d/n).write_bytes(b) for n,b in files.items()];runpy.run_path(str(d/'server.py'),run_name='__main__')";
+  const python = "import os,runpy;from pathlib import Path;p=runpy.run_path('scripts/publish_space.py');d=Path(os.environ['UNIFY_QA_RUNTIME']);files=p['payload']('a'*40);[(d/n).write_bytes(b) for n,b in files.items()];runpy.run_path(str(d/'server.py'),run_name='__main__')";
   const log = fs.createWriteStream(path.join(out, 'preview.log'));
   const server = spawn(process.env.PYTHON || 'python3', ['-B', '-c', python], { cwd: root, env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', UNIFY_QA_RUNTIME: runtime, HOST: '127.0.0.1', PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });
   server.stdout.pipe(log); server.stderr.pipe(log);
@@ -147,7 +147,7 @@ async function inspect(page, forced = false) {
     check('keyboard: full source table remains scrollable', await keyboard.page.locator('.evidence-table-wrap').evaluate(el => el.scrollLeft > 0));
     await keyboard.page.getByRole('button', { name: 'Check again' }).click();
     await keyboard.page.getByText('Local source bytes verified', { exact: true }).waitFor();
-    check('manual refresh preserves exact source binding', await keyboard.page.locator('#identity-revision').getAttribute('href') === 'https://github.com/szl-holdings/holographic-unify/tree/' + '0'.repeat(40));
+    check('manual refresh preserves exact source binding', await keyboard.page.locator('#identity-revision').getAttribute('href') === 'https://github.com/szl-holdings/holographic-unify/tree/' + 'a'.repeat(40));
     traffic('keyboard and manual refresh', keyboard, 2);
     await keyboard.context.close();
     const identity = { schema: 'szl.build-info/v1', source_repository: 'szl-holdings/holographic-unify', source_revision: 'a'.repeat(40), state: 'LOCAL_BYTES_VERIFIED', build: { state: 'OBSERVED', revision: 'a'.repeat(40) }, receipt_minted: false, signature: 'UNSIGNED-honest' };
@@ -156,6 +156,7 @@ async function inspect(page, forced = false) {
       { label: 'invalid JSON', status: 200, body: '<script>unexpected()</script>' },
       { label: 'foreign repository', status: 200, body: JSON.stringify({ ...identity, source_repository: 'untrusted/example' }) },
       { label: 'mismatched revision', status: 200, body: JSON.stringify({ ...identity, source_revision: 'b'.repeat(40) }) },
+      { label: 'null Git revision', status: 200, body: JSON.stringify({ ...identity, source_revision: '0'.repeat(40), build: { state: 'OBSERVED', revision: '0'.repeat(40) } }) },
       { label: 'invented receipt', status: 200, body: JSON.stringify({ ...identity, receipt_minted: true }) },
     ]) {
       const { label, ...response } = fixture;
@@ -176,7 +177,7 @@ async function inspect(page, forced = false) {
     await new Promise(resolve => { if (server.exitCode !== null) return resolve(); server.once('exit', resolve); setTimeout(resolve, 3000); });
     fs.rmSync(runtime, { recursive: true, force: true });
     const failures = checks.filter(c => !c.pass);
-    fs.writeFileSync(path.join(out, 'results.json'), JSON.stringify({ schema: 'szl.local-presentation-observation.v1', unsigned: true, scope: 'Staged source UI with an all-zero local-fixture revision; not deployment or model evidence', playwright: require('playwright/package.json').version, createdAt: new Date().toISOString(), checks, observations }, null, 2) + '\n');
+    fs.writeFileSync(path.join(out, 'results.json'), JSON.stringify({ schema: 'szl.local-presentation-observation.v1', unsigned: true, scope: 'Staged source UI with a synthetic nonzero Git-shaped fixture revision; not deployment or model evidence', playwright: require('playwright/package.json').version, createdAt: new Date().toISOString(), checks, observations }, null, 2) + '\n');
     console.log(JSON.stringify({ checks: checks.length, passed: checks.length - failures.length, failures }, null, 2));
     if (failures.length) process.exitCode = 1;
   }

@@ -62,7 +62,7 @@ class SourceTests(unittest.TestCase):
             with self.assertRaisesRegex(p.PublicationError, '^GIT_UNAVAILABLE$'): p.git('rev-parse', 'HEAD')
 
     def test_sha_parser_rejects_short_refs_and_types(self):
-        for value in ('main', 'a'*39, 'A'*40, 17, None):
+        for value in ('main', 'a'*39, 'A'*40, '0'*40, 17, None):
             with self.subTest(value=value), self.assertRaises(p.PublicationError): p.exact_sha(value)
 
 
@@ -104,6 +104,7 @@ class PayloadTests(unittest.TestCase):
         baseline = json.loads(p.payload(A)['deployment.json'])
         cases = []
         d = copy.deepcopy(baseline); d['source']['repository'] = 'other/repo'; cases.append(d)
+        d = copy.deepcopy(baseline); d['source']['revision'] = '0'*40; cases.append(d)
         d = copy.deepcopy(baseline); d['target']['repo_id'] = 'SZLHOLDINGS/szl-constellation'; cases.append(d)
         d = copy.deepcopy(baseline); d['files'][0]['path'] = '../other'; cases.append(d)
         d = copy.deepcopy(baseline); d['files'][0] = d['files'][1]; cases.append(d)

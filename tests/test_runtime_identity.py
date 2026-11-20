@@ -48,6 +48,16 @@ class RuntimeHttpTests(unittest.TestCase):
         self.assertEqual(info['source_repository'],p.SOURCE_REPOSITORY)
         self.assertEqual(info['build'],{'state':'OBSERVED','revision':'a'*40})
         self.assertIs(info['receipt_minted'],False)
+    def test_null_source_revision_never_claims_verified_http_build(self):
+        data = json.loads(self.files['deployment.json'])
+        data['source']['revision'] = '0' * 40
+        (self.root/'deployment.json').write_bytes(p.encoded(data))
+        for path in ('/api/build-info', '/deployment.json', '/readyz'):
+            with self.subTest(path=path):
+                status, body, _ = self.request(path)
+                self.assertEqual(status, 503)
+                self.assertEqual(json.loads(body)['state'], 'SOURCE_BINDING_UNAVAILABLE')
+
     def test_missing_and_tampered_identity_return_unavailable_not_html(self):
         (self.root/'index.html').write_text('tampered')
         status,body,_=self.request('/api/build-info')

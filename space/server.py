@@ -67,7 +67,7 @@ def deployment_bytes() -> tuple[bytes, str]:
     if not isinstance(source, dict) or source.get("repository") != SOURCE:
         raise ValueError("invalid source")
     revision = source.get("revision")
-    if not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None:
+    if not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None or revision == "0" * 40:
         raise ValueError("invalid source revision")
     if target != {"repo_id": TARGET, "repo_type": "space"}:
         raise ValueError("invalid target")
