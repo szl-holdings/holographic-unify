@@ -24,6 +24,8 @@ PAYLOAD_FILES = {
     "szl-space-hologram.css", "szl-space-hologram.js", "unify.css", "unify.js",
     "szl-tokens.css", "szl-icon-32.svg", "favicon.svg", "apple-touch-icon.png",
     "szl-source.json", "szl-projection.json",
+    "assets/szl-card/mesh-receipts.svg",
+    "assets/szl-card/org-context.svg",
 }
 STATIC_ASSETS = {
     "/szl-space-hologram.css": "text/css", "/szl-space-hologram.js": "text/javascript",
@@ -55,7 +57,10 @@ def require(condition: bool, message: str) -> None:
 
 
 def verify_payload() -> None:
-    actual = {path.name for path in SPACE.iterdir() if path.is_file()}
+    entries = list(SPACE.rglob("*"))
+    require(all(not p.is_symlink() and (p.is_file() or p.is_dir()) for p in entries),
+            "nonregular or symlinked payload source")
+    actual = {path.relative_to(SPACE).as_posix() for path in entries if path.is_file()}
     require(actual == PAYLOAD_FILES, f"payload files differ: {sorted(actual)}")
 
     readme = (SPACE / "README.md").read_text(encoding="utf-8")
@@ -168,7 +173,9 @@ def verify_local(timeout: float) -> dict[str, Any]:
     with tempfile.TemporaryDirectory() as temporary:
         runtime = Path(temporary)
         for name, body in staged_payload.items():
-            (runtime / name).write_bytes(body)
+            path = runtime / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(body)
         with socket.socket() as probe:
             probe.bind(("127.0.0.1", 0))
             port = probe.getsockname()[1]

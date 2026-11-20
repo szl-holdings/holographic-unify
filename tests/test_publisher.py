@@ -70,7 +70,10 @@ class PayloadTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        for name in p.PAYLOAD_FILES: (self.root / name).write_bytes(name.encode())
+        for name in p.PAYLOAD_FILES:
+            path = self.root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(name.encode())
         self.override = patch.object(p, 'SPACE', self.root)
         self.override.start()
     def tearDown(self): self.override.stop(); self.temp.cleanup()
@@ -282,6 +285,17 @@ class ProviderTests(unittest.TestCase):
         self.api.initial_files=['user-data.json']
         with self.assertRaisesRegex(p.PublicationError,'UNOWNED_PROVIDER_FILES'): self.execute()
         self.assertEqual(self.api.commits,[])
+
+    def test_existing_card_assets_are_owned_and_preserved(self):
+        names = ("assets/szl-card/mesh-receipts.svg",
+                 "assets/szl-card/org-context.svg")
+        self.api.initial_files = [".gitattributes", *names]
+        for name in names:
+            self.files[name] = name.encode()
+        self.execute()
+        self.assertEqual(self.receipt["status"], "RUNTIME_VERIFIED")
+        self.assertEqual(len(self.api.commits), 1)
+        self.assertTrue(set(names) <= set(self.api.store))
 
     def test_source_advance_before_commit_stops_write(self):
         with self.assertRaisesRegex(p.PublicationError,'SOURCE_MOVED_BEFORE_COMMIT'): self.execute(fresh=lambda:B)

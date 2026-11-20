@@ -23,7 +23,10 @@ s=load('http_test_server',ROOT/'space/server.py')
 class RuntimeHttpTests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory(); self.root=Path(self.tmp.name)
-        for name in p.PAYLOAD_FILES: (self.root/name).write_bytes(name.encode())
+        for name in p.PAYLOAD_FILES:
+            path = self.root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(name.encode())
         with patch.object(p,'SPACE',self.root): self.files=p.payload('a'*40)
         (self.root/'deployment.json').write_bytes(self.files['deployment.json'])
         self.context=patch.object(s,'HERE',self.root); self.context.start()
@@ -70,6 +73,15 @@ class RuntimeHttpTests(unittest.TestCase):
         })
         (self.root/'deployment.json').unlink()
         self.assertEqual(self.request('/deployment.json')[0],503)
+    def test_tampered_nested_card_asset_denies_readiness(self):
+        card = self.root / "assets" / "szl-card" / "mesh-receipts.svg"
+        self.assertTrue(card.is_file())
+        card.write_bytes(b"tampered")
+        for path in ("/readyz", "/deployment.json", "/api/build-info"):
+            with self.subTest(path=path):
+                status, _, _ = self.request(path)
+                self.assertEqual(status, 503)
+
     def test_head_and_unknown_routes_have_truthful_status(self):
         status,body,headers=self.request('/deployment.json','HEAD')
         self.assertEqual(status,200);self.assertEqual(body,b'')

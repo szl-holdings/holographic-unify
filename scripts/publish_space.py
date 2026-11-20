@@ -30,6 +30,8 @@ PAYLOAD_FILES = frozenset({
     "szl-space-hologram.css", "szl-space-hologram.js", "unify.css", "unify.js",
     "szl-tokens.css", "szl-icon-32.svg", "favicon.svg", "apple-touch-icon.png",
     "szl-source.json", "szl-projection.json",
+    "assets/szl-card/mesh-receipts.svg",
+    "assets/szl-card/org-context.svg",
 })
 SHA40 = re.compile(r"[0-9a-f]{40}")
 MAX_BYTES = 8 * 1024 * 1024
@@ -85,11 +87,13 @@ def exact_main() -> str:
 
 def payload(source: str) -> dict[str, bytes]:
     exact_sha(source)
-    entries = list(SPACE.iterdir())
-    require({p.name for p in entries} == PAYLOAD_FILES, "UNEXPECTED_LOCAL_PAYLOAD")
-    require(all(p.is_file() and not p.is_symlink() for p in entries), "NONREGULAR_PAYLOAD")
-    require(all(p.stat().st_size <= MAX_BYTES for p in entries), "PAYLOAD_SIZE_LIMIT")
-    files = {p.name: p.read_bytes() for p in entries}
+    entries = list(SPACE.rglob("*"))
+    require(all(not p.is_symlink() and (p.is_file() or p.is_dir()) for p in entries),
+            "NONREGULAR_PAYLOAD")
+    sources = {p.relative_to(SPACE).as_posix(): p for p in entries if p.is_file()}
+    require(set(sources) == PAYLOAD_FILES, "UNEXPECTED_LOCAL_PAYLOAD")
+    require(all(p.stat().st_size <= MAX_BYTES for p in sources.values()), "PAYLOAD_SIZE_LIMIT")
+    files = {name: path.read_bytes() for name, path in sources.items()}
     require(sum(map(len, files.values())) <= MAX_BYTES, "PAYLOAD_SIZE_LIMIT")
     manifest = {
         "schema": "szl.holographic-deployment/v1",
