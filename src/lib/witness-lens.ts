@@ -22,6 +22,7 @@ export type WitnessLensResult = Readonly<{
   nodes: readonly WitnessNode[];
   unknownObservations: number;
   coverage: Readonly<{ numerator: number; denominator: number; fraction: number | null }>;
+  coverageBasis: "FRESH_HASH_DECLARATIONS_NOT_VERIFIED";
   runtimeQualified: false;
   independentSignatureVerified: false;
 }>;
@@ -34,6 +35,14 @@ export type WitnessLensInput = Readonly<{
   observations: readonly unknown[];
 }>;
 
+/** Documented untrusted wire shape, not a validated identity or signed receipt. */
+export type WitnessObservation = Readonly<{
+  canonicalId: string;
+  sourceRevision: string;
+  observedAtUtc: string;
+  receiptSha256?: string | null;
+}>;
+
 const ID = /^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$/;
 const GIT_SHA = /^[0-9a-f]{40}$/;
 const RECEIPT_SHA = /^[0-9a-f]{64}$/;
@@ -43,6 +52,19 @@ const empty = (denominator = 0) => ({
 });
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
+
+function validInput(value: unknown): value is WitnessLensInput {
+  if (!isRecord(value)) return false;
+  const { expectedIds, expectedRevision, nowEpochMs, maxAgeMs, observations } = value;
+  return Array.isArray(expectedIds) && expectedIds.length > 0 && expectedIds.length <= 256
+    && expectedIds.every((id: unknown) => typeof id === "string" && ID.test(id))
+    && new Set(expectedIds).size === expectedIds.length
+    && typeof expectedRevision === "string" && GIT_SHA.test(expectedRevision)
+    && typeof nowEpochMs === "number" && Number.isSafeInteger(nowEpochMs) && nowEpochMs >= 0
+    && typeof maxAgeMs === "number" && Number.isSafeInteger(maxAgeMs)
+    && maxAgeMs >= 1 && maxAgeMs <= 300000
+    && Array.isArray(observations) && observations.length <= 512;
+}
 
 function utcEpoch(value: unknown): number | null {
   if (typeof value !== "string" || !UTC_SECOND.test(value)) return null;
@@ -59,25 +81,20 @@ function node(id: string, state: WitnessState, ageMs: number | null = null,
 
 /**
  * No network, ambient clock, signature trust, model execution or provider writes.
- * Duplicate IDs fail closed; coverage measures CANDIDATE observations, not health.
+ * Duplicates have unconditional hard-refusal precedence even over malformed peers.
+ * Coverage counts only fresh declarations with a syntactically valid receipt hash;
+ * it is NOT observation quality, cryptographic proof or runtime health.
  */
-export function evaluateWitnessLens(input: WitnessLensInput): WitnessLensResult {
+export function evaluateWitnessLens(input: unknown): WitnessLensResult {
   const refused = (): WitnessLensResult => ({
     gate: "INVALID_CONTRACT", nodes: [], unknownObservations: 0,
-    coverage: empty(), runtimeQualified: false, independentSignatureVerified: false,
+    coverage: empty(), coverageBasis: "FRESH_HASH_DECLARATIONS_NOT_VERIFIED",
+    runtimeQualified: false, independentSignatureVerified: false,
   });
-  if (!isRecord(input) ||
-      !Array.isArray(input.expectedIds) || input.expectedIds.length === 0 ||
-      input.expectedIds.length > 256 ||
-      !input.expectedIds.every((id: unknown) => typeof id === "string" && ID.test(id)) ||
-      new Set(input.expectedIds).size !== input.expectedIds.length ||
-      typeof input.expectedRevision !== "string" || !GIT_SHA.test(input.expectedRevision) ||
-      !Number.isSafeInteger(input.nowEpochMs) || input.nowEpochMs < 0 ||
-      !Number.isSafeInteger(input.maxAgeMs) || input.maxAgeMs < 1 || input.maxAgeMs > 300000 ||
-      !Array.isArray(input.observations) || input.observations.length > 512) return refused();
+  if (!validInput(input)) return refused();
 
   const expected = new Set(input.expectedIds);
-  const grouped = new Map<string, unknown[]>();
+  const grouped = new Map<string, Record<string, unknown>[]>();
   let unknownObservations = 0;
   for (const observation of input.observations) {
     if (!isRecord(observation) || typeof observation.canonicalId !== "string" ||
@@ -94,7 +111,7 @@ export function evaluateWitnessLens(input: WitnessLensInput): WitnessLensResult 
     const group = grouped.get(id) ?? [];
     if (!group.length) return node(id, "UNAVAILABLE");
     if (group.length > 1) return node(id, "DUPLICATE");
-    const claim = group[0] as Record<string, unknown>;
+    const claim = group[0];
     if (typeof claim.sourceRevision !== "string" || !GIT_SHA.test(claim.sourceRevision))
       return node(id, "INVALID");
     if (claim.sourceRevision !== input.expectedRevision)
@@ -112,5 +129,6 @@ export function evaluateWitnessLens(input: WitnessLensInput): WitnessLensResult 
   const numerator = nodes.filter((x) => x.state === "OBSERVED_UNVERIFIED").length;
   return { gate: "SOURCE_ONLY", nodes, unknownObservations,
     coverage: { numerator, denominator: nodes.length, fraction: numerator / nodes.length },
+    coverageBasis: "FRESH_HASH_DECLARATIONS_NOT_VERIFIED",
     runtimeQualified: false, independentSignatureVerified: false };
 }
