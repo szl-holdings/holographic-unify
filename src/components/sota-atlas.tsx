@@ -3,6 +3,7 @@ import { ExternalLink, Filter } from "lucide-react";
 import { ORGANS, type OrganId } from "@/lib/catalog";
 import {
   HF_SOFTWARE,
+  catalogStatusLabel,
   SOFTWARE_COUNTS,
   SOTA_COUNTS,
   SOTA_JOBS,
@@ -63,11 +64,15 @@ export function SotaAtlas({
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Count label="LIVE" value={SOTA_COUNTS.live + SOFTWARE_COUNTS.live} ok />
+        <Count label="CATALOG LIVE" value={SOTA_COUNTS.live + SOFTWARE_COUNTS.live} ok />
         <Count label="HOLOGRAM" value={SOTA_COUNTS.hologram + SOFTWARE_COUNTS.hologram} />
         <Count label="ROADMAP" value={SOTA_COUNTS.roadmap + SOFTWARE_COUNTS.roadmap} warn />
         <Count label="REFUSED" value={SOTA_COUNTS.refused + SOFTWARE_COUNTS.refused} danger />
       </div>
+      <p role="note" className="text-xs leading-relaxed text-muted">
+        Curated catalog labels only. LIVE does not prove authenticated runtime telemetry,
+        signed inference receipts, or browser renderer readiness.
+      </p>
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <label className="relative flex-1">
@@ -123,7 +128,7 @@ export function SotaAtlas({
                 <ExternalLink className="size-3.5" />
               </a>
               <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] tracking-wider ${chip(h.status)}`}>
-                {h.status}
+                {catalogStatusLabel(h.status)}
               </span>
             </div>
             <p className="mt-2 text-sm leading-relaxed text-muted">{h.subtitle}</p>
@@ -143,7 +148,7 @@ export function StatusLegend() {
     <ul className="flex flex-wrap gap-3 text-xs">
       {STATUSES.map((s) => (
         <li key={s} className={`font-mono ${tone(s)}`}>
-          {s}
+          {catalogStatusLabel(s)}
         </li>
       ))}
     </ul>

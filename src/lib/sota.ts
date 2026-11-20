@@ -45,6 +45,11 @@ export function catalogStatusSummary(jobs: readonly Pick<SotaJob, "status">[]) {
   };
 }
 
+/** Display-only catalog label; never promote curated LIVE to runtime telemetry. */
+export function catalogStatusLabel(status: SotaStatus): string {
+  return status === "LIVE" ? "CATALOG LIVE" : status;
+}
+
 export const SOTA_JOBS: SotaJob[] = [
   {
     job: "Unified model API",
