@@ -45,7 +45,7 @@ def require(ok: bool, code: str) -> None:
 
 
 def exact_sha(value: Any) -> str:
-    require(isinstance(value, str) and SHA40.fullmatch(value) is not None, "INVALID_REVISION")
+    require(isinstance(value, str) and SHA40.fullmatch(value) is not None and value != "0" * 40, "INVALID_REVISION")
     return value
 
 
