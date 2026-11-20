@@ -102,6 +102,25 @@ class NativeFrontendTests(unittest.TestCase):
             self.assertIn(required, css)
         self.assertNotRegex(css, r'@import\b|https?://|overflow-x:\s*(?:hidden|clip)')
 
+    def test_browser_stage_handles_nested_source_owned_card_assets(self):
+        # This is also exercised by the existing browser workflow's
+        # test_native_frontend.py selector, so it cannot silently fall out
+        # of required CI after the standalone stage regression is added.
+        from test_qualify_native_stage import stage_fixture
+
+        exit_code, started, content_exact = stage_fixture(nested=True)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(started, "RUN")
+        self.assertTrue(content_exact)
+
+    def test_browser_stage_preserves_flat_file_boot(self):
+        from test_qualify_native_stage import stage_fixture
+
+        exit_code, started, content_exact = stage_fixture(nested=False)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(started, "RUN")
+        self.assertTrue(content_exact)
+
     def test_presentation_evidence_upload_fails_closed_when_missing(self):
         workflow = (ROOT / ".github/workflows/szl-holographic-space-v2.yml").read_text(encoding="utf-8")
         self.assertIn("if-no-files-found: error", workflow)
