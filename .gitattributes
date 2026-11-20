@@ -1,0 +1,2 @@
+# Exact-byte Hugging Face Space card payloads: never apply CRLF conversion.
+space/assets/szl-card/*.svg -text

@@ -23,6 +23,8 @@ PAYLOAD_FILES = {
     "szl-space-hologram.css", "szl-space-hologram.js", "unify.css", "unify.js",
     "szl-tokens.css", "szl-icon-32.svg", "favicon.svg", "apple-touch-icon.png",
     "szl-source.json", "szl-projection.json",
+    "assets/szl-card/mesh-receipts.svg",
+    "assets/szl-card/org-context.svg",
 }
 STATIC_FILES = {
     "/": ("index.html", "text/html; charset=utf-8"),
@@ -82,7 +84,10 @@ def deployment_bytes() -> tuple[bytes, str]:
             raise ValueError("duplicate manifest path")
         seen.add(name)
         p = HERE / name
-        if p.is_symlink() or not p.is_file() or p.stat().st_size > 8 * 1024 * 1024:
+        # Nested card assets are fixed names. Never follow symlinked parents.
+        parents = list(p.parents)[:len(Path(name).parts) - 1]
+        if (p.is_symlink() or any(part.is_symlink() for part in parents) or
+                not p.is_file() or p.stat().st_size > 8 * 1024 * 1024):
             raise ValueError("invalid payload file")
         body = p.read_bytes()
         if type(row.get("bytes")) is not int or len(body) != row["bytes"] or hashlib.sha256(body).hexdigest() != row.get("sha256"):

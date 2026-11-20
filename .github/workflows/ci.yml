@@ -63,7 +63,9 @@ jobs:
           payload = runpy.run_path("scripts/publish_space.py")["payload"](os.environ["SOURCE_SHA"])
           target = Path(os.environ["RUNTIME_CONTEXT"])
           for name, body in payload.items():
-              (target / name).write_bytes(body)
+              candidate = target / name
+              candidate.parent.mkdir(parents=True, exist_ok=True)
+              candidate.write_bytes(body)
           PY
           docker build --tag holographic-unify:ci "$runtime_context"
           container="$(docker run --detach --publish 127.0.0.1:17860:7860 holographic-unify:ci)"
