@@ -34,8 +34,18 @@ test("positive structural claim never becomes independently verified runtime", (
   assert.equal(result.nodes[0].signatureVerified, false);
   assert.equal(result.runtimeQualified, false);
   assert.equal(result.independentSignatureVerified, false);
+  assert.equal(result.coverageBasis, "FRESH_HASH_DECLARATIONS_NOT_VERIFIED");
   assert.deepEqual(result.coverage,
     { numerator: 1, denominator: 1, fraction: 1 });
+});
+
+test("untrusted top-level input is rejected before inspecting fields", () => {
+  for (const value of [null, false, 1, "literal", [], { expectedIds: ["node-1"] }]) {
+    const result = evaluateWitnessLens(value);
+    assert.equal(result.gate, "INVALID_CONTRACT");
+    assert.equal(result.coverage.fraction, null);
+    assert.equal(result.runtimeQualified, false);
+  }
 });
 
 test("empty and duplicate expected IDs fail with unavailable denominator", () => {
@@ -61,6 +71,21 @@ test("duplicate candidates fail closed even when one is valid", () => {
   assert.equal(result.nodes[0].state, "DUPLICATE");
   assert.equal(result.coverage.numerator, 0);
   assert.equal(result.nodes[0].receiptHashDeclared, false);
+});
+
+test("duplicate precedence rejects valid plus hostile evidence without false LIVE", () => {
+  for (const hostile of [
+    claim({ sourceRevision: OTHER_REV }),
+    claim({ sourceRevision: undefined, observedAtUtc: "not a time" }),
+    claim({ observedAtUtc: utc(+1000) }),
+    claim({ receiptSha256: "invalid" }),
+  ]) {
+    const result = evaluate([claim(), hostile]);
+    assert.equal(result.nodes[0].state, "DUPLICATE");
+    assert.equal(result.coverage.numerator, 0);
+    assert.equal(result.nodes[0].runtimeVerified, false);
+    assert.equal(result.nodes[0].signatureVerified, false);
+  }
 });
 
 test("off-roster evidence does not create a real node or inflate coverage", () => {
@@ -104,8 +129,10 @@ test("malformed ISO dates and implicit time zones are not accepted", () => {
 });
 
 test("receipt hash is only a declaration, not signature verification", () => {
-  assert.equal(evaluate([claim({ receiptSha256: undefined })])
-    .nodes[0].state, "UNVERIFIED");
+  const absentHash = evaluate([claim({ receiptSha256: undefined })]);
+  assert.equal(absentHash.nodes[0].state, "UNVERIFIED");
+  assert.equal(absentHash.coverage.numerator, 0);
+  assert.equal(absentHash.coverageBasis, "FRESH_HASH_DECLARATIONS_NOT_VERIFIED");
   for (const receiptSha256 of ["", HASH.toUpperCase(), "f".repeat(63), 42]) {
     assert.equal(evaluate([claim({ receiptSha256 })])
       .nodes[0].state, "INVALID");
