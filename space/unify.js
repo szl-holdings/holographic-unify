@@ -36,7 +36,7 @@
       const value = JSON.parse(body);
       const sha = value.source_revision;
       if (value.schema !== "szl.build-info/v1" || value.source_repository !== "szl-holdings/holographic-unify" ||
-          typeof sha !== "string" || !/^[a-f0-9]{40}$/.test(sha) || value.state !== "LOCAL_BYTES_VERIFIED" ||
+          typeof sha !== "string" || !/^[a-f0-9]{40}$/.test(sha) || /^0{40}$/.test(sha) || value.state !== "LOCAL_BYTES_VERIFIED" ||
           value.build?.state !== "OBSERVED" || value.build?.revision !== sha || value.receipt_minted !== false ||
           value.signature !== "UNSIGNED-honest") throw new Error("Identity contract mismatch");
       state.textContent = "Local source bytes verified";
