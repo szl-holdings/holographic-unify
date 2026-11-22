@@ -229,6 +229,17 @@ def wait_for_runtime(api: Any, revision: str, files: Mapping[str, bytes], source
                 health = json.loads(read("/healthz"))
                 require(health.get("ok") is True and health.get("github") == SOURCE_REPOSITORY
                         and health.get("canonical_space") == SPACE_ID, "RUNTIME_HEALTH_MISMATCH")
+            except PublicationError as exc:
+                # The expected revision can be RUNNING while its edge still serves
+                # previous bytes; retry only known readback mismatches, not policy
+                # failures such as RUNTIME_REDIRECT_REFUSED.
+                if str(exc) not in {
+                    "RUNTIME_ROOT_MISMATCH", "RUNTIME_SOURCE_MISMATCH",
+                    "RUNTIME_HEALTH_MISMATCH",
+                }:
+                    raise
+                sleep(min(2, max(0, deadline - time.monotonic())))
+                continue
             except (OSError, ValueError):
                 sleep(min(2, max(0, deadline - time.monotonic())))
                 continue
