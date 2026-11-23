@@ -312,6 +312,35 @@ class ProviderTests(unittest.TestCase):
             self.execute(download=lambda n,r: b'wrong' if r == C else b'preserved attrs')
         self.assertEqual(self.saved[-1]['status'],'PROVIDER_COMMITTED')
 
+    def test_transient_old_runtime_bytes_retry_until_exact_readback(self):
+        # Hub RUNNING at the target SHA can briefly serve old edge bytes.
+        for stale_path in ("/", "/deployment.json", "/healthz"):
+            self.setUp()
+            calls = []
+
+            def read(path):
+                calls.append(path)
+                if path == stale_path and calls.count(path) == 1:
+                    return b"{}" if path == "/healthz" else b"old deployment"
+                return self.read(path)
+
+            with self.subTest(stale_path=stale_path):
+                self.execute(read=read)
+                self.assertEqual(self.receipt["status"], "RUNTIME_VERIFIED")
+                self.assertGreaterEqual(calls.count(stale_path), 2)
+
+    def test_redirect_refusal_is_not_treated_as_transient_bytes(self):
+        calls = []
+
+        def reject(path):
+            calls.append(path)
+            raise p.PublicationError("RUNTIME_REDIRECT_REFUSED")
+
+        with self.assertRaisesRegex(p.PublicationError, "^RUNTIME_REDIRECT_REFUSED$"):
+            self.execute(read=reject)
+        self.assertEqual(calls, ["/"])
+        self.assertEqual(self.saved[-1]["status"], "PROVIDER_VERIFIED")
+
     def test_runtime_wrong_root_or_deployment_never_passes(self):
         for wrong in ['/', '/deployment.json']:
             self.setUp()
