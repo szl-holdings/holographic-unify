@@ -61,6 +61,20 @@ class RuntimeHttpTests(unittest.TestCase):
                 self.assertEqual(status, 503)
                 self.assertEqual(json.loads(body)['state'], 'SOURCE_BINDING_UNAVAILABLE')
 
+    def test_manifest_claims_must_remain_read_only_and_unevaluated(self):
+        for claims in (None, {}, {"execution_authority": True, "model_quality": "NOT_EVALUATED"},
+                       {"execution_authority": 0, "model_quality": "NOT_EVALUATED"},
+                       {"execution_authority": False, "model_quality": "QUALIFIED"},
+                       {"execution_authority": False, "model_quality": "NOT_EVALUATED", "extra": True}):
+            with self.subTest(claims=claims):
+                data = json.loads(self.files['deployment.json'])
+                data['claims'] = claims
+                (self.root/'deployment.json').write_bytes(p.encoded(data))
+                for path in ('/readyz', '/deployment.json', '/api/build-info'):
+                    status, body, _ = self.request(path)
+                    self.assertEqual(status, 503)
+                    self.assertEqual(json.loads(body)['state'], 'SOURCE_BINDING_UNAVAILABLE')
+
     def test_missing_and_tampered_identity_return_unavailable_not_html(self):
         (self.root/'index.html').write_text('tampered')
         status,body,_=self.request('/api/build-info')
