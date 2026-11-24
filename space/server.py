@@ -73,6 +73,10 @@ def deployment_bytes() -> tuple[bytes, str]:
         raise ValueError("invalid source revision")
     if target != {"repo_id": TARGET, "repo_type": "space"}:
         raise ValueError("invalid target")
+    claims = data.get("claims")
+    if (not isinstance(claims, dict) or set(claims) != {"execution_authority", "model_quality"}
+            or claims["execution_authority"] is not False or claims["model_quality"] != "NOT_EVALUATED"):
+        raise ValueError("invalid deployment claims")
     if not isinstance(rows, list) or len(rows) != len(PAYLOAD_FILES):
         raise ValueError("invalid payload manifest")
     seen = set()
